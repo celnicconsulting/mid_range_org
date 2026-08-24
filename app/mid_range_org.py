@@ -9,21 +9,22 @@ element here traces to a row of `design/mart_contract.md`.
     ┌──────────────────────┬────────────────────────────────────────────────┐
     │ SIDEBAR              │  Mid-Range Organisations — NZ Public Data      │
     │                      │  ┌──────────────────────────────────────────┐  │
-    │ 🏛️ Mid-Range Org     │  │ ⚠ Not an official government product.    │  │
-    │ ──────────────       │  │   Figures marked 🔶 are SYNTHETIC.       │  │
-    │ Organisation         │  └──────────────────────────────────────────┘  │
-    │ ☑ DIA ☑ CUS ☑ SNZ    │                                                │
-    │ ☑ MFT ☑ LNZ ☑ MFE    │  ┌────┬────┬────┬────┬────┬────┬────┬────┐    │
-    │ ☑ MOH                │  │ 🏛️ │ 💹 │ 🌏 │ 🎲 │ 🩺 │ 🌡️ │ 🗺️ │ 🔎 │    │
-    │                      │  └────┴────┴────┴────┴────┴────┴────┴────┘    │
-    │ ──────────────       │                                                │
-    │ PROVENANCE           │   ── tab body ──                               │
-    │ ● REAL — measured    │                                                │
+    │ 🏛️ Mid-Range Org     │  │▨▨▨▨ 45° hazard stripe, #FFD100 on #111 ▨▨│  │
+    │ ──────────────       │  ├──────────────────────────────────────────┤  │
+    │ Organisation         │  │ ⚠ BUILT FROM NEW ZEALAND GOVERNMENT DATA │  │
+    │ ☑ DIA ☑ CUS ☑ SNZ    │  │   — NOT AN OFFICIAL GOVERNMENT PRODUCT   │  │
+    │ ☑ MFT ☑ LNZ ☑ MFE    │  │   the seven agencies, named              │  │
+    │ ☑ MOH                │  │  ────────────────────────────────────    │  │
+    │                      │  │   🔶 SYNTHETIC · ◍ survey · gap ≠ zero   │  │
+    │ ──────────────       │  ├──────────────────────────────────────────┤  │
+    │ PROVENANCE           │  │▨▨▨▨ 45° hazard stripe, #FFD100 on #111 ▨▨│  │
+    │ ● REAL — measured    │  └──────────────────────────────────────────┘  │
     │ ● DERIVED — computed │                                                │
-    │ 🔶 SYNTHETIC         │                                                │
-    │ ◍ SURVEY — has CIs   │                                                │
+    │ ● COMPARE — 2nd org  │  ┌────┬────┬────┬────┬────┬────┬────┬────┐    │
+    │ 🔶 SYNTHETIC         │  │ 🏛️ │ 💹 │ 🌏 │ 🎲 │ 🩺 │ 🌡️ │ 🗺️ │ 🔎 │    │
+    │ ◍ SURVEY — has CIs   │  └────┴────┴────┴────┴────┴────┴────┴────┘    │
     │ ──────────────       │                                                │
-    │ N source files       │                                                │
+    │ N source files       │   ── tab body ──                               │
     │ 7 agencies · 6 hosts │                                                │
     └──────────────────────┴────────────────────────────────────────────────┘
 
@@ -53,8 +54,11 @@ element here traces to a row of `design/mart_contract.md`.
     Suppressed values are a GAP, never zero; the tooltip names the symbol the
     agency published.
 
-    Banners: st.warning on a partly synthetic tab naming which elements are
-    modelled; st.error on a fully synthetic tab (there is none in this build).
+    Banners: a hazard-striped black-and-#FFD100 header above every tab, drawn as
+    raw HTML so the stripes survive both themes and matching the MSD platform's
+    banner so the two read as one family. Inside a tab, st.warning names which
+    elements are modelled; st.error would mark a fully synthetic tab (there is
+    none in this build).
 
     One y-axis, always. Two measures of different scale become two charts or an
     indexed series — never a second axis.
@@ -650,6 +654,60 @@ def fmt(value, prefix="", suffix="", dp=0):
         return f"{prefix}{float(value):,.{dp}f}{suffix}"
     except (TypeError, ValueError):
         return str(value)
+
+
+def render_header():
+    """Hazard-striped provenance banner, shown above every tab.
+
+    Drawn as raw HTML rather than `st.error` so the stripes survive both
+    Streamlit themes and both host themes: a 3px black frame, a 14px
+    yellow-and-black 45-degree stripe band top and bottom, and a solid #FFD100
+    panel between them. Matches the MSD platform's banner so the two read as one
+    family.
+
+    The application is built from public releases but is not published by, nor
+    endorsed by, the seven agencies that produced them, so that is stated before
+    any figure is shown rather than buried in a footnote. The synthetic and
+    survey markers are defined here too, because a reader meets them on tab 1.
+    """
+    st.html(
+        """
+        <div style="border:3px solid #111; border-radius:6px; overflow:hidden;
+                    margin:0 0 14px 0; font-family:sans-serif;">
+          <div style="height:14px; background:repeating-linear-gradient(
+                        45deg, #FFD100 0 14px, #111 14px 28px);"></div>
+          <div style="background:#FFD100; color:#111; padding:12px 16px;">
+            <div style="font-weight:800; font-size:15px; letter-spacing:.02em;">
+              &#9888;&#65039; BUILT FROM NEW ZEALAND GOVERNMENT DATA &mdash;
+              NOT AN OFFICIAL GOVERNMENT PRODUCT
+            </div>
+            <div style="font-size:13.5px; line-height:1.5; margin-top:6px;">
+              Figures are reproduced from public releases by the
+              <b>Department of Internal Affairs</b>, the
+              <b>New Zealand Customs Service</b>, <b>Stats NZ</b>, the
+              <b>Ministry of Foreign Affairs and Trade</b>,
+              <b>Land Information New Zealand</b>, the
+              <b>Ministry for the Environment</b> and the
+              <b>Ministry of Health</b>.
+              This application is produced independently by Celnic Consulting and
+              <b>does not represent the views, policy or official statistics of
+              those departments</b>.
+            </div>
+            <div style="font-size:13.5px; line-height:1.5; margin-top:8px;
+                        border-top:1px solid rgba(17,17,17,.28); padding-top:8px;">
+              &#128310; marks a <b>SYNTHETIC</b> figure &mdash; modelled, not
+              measured. &#9677; marks a <b>survey estimate</b>, always drawn with
+              its confidence interval. Suppressed values are shown as a
+              <b>gap, never as zero</b>. Every source file, with its download date
+              and checksum, is listed in the
+              <b>&#128270; Data &amp; Provenance</b> tab.
+            </div>
+          </div>
+          <div style="height:14px; background:repeating-linear-gradient(
+                        45deg, #FFD100 0 14px, #111 14px 28px);"></div>
+        </div>
+        """
+    )
 
 
 # ====================SIDEBAR====================
@@ -1397,11 +1455,7 @@ def main():
     orgs = render_sidebar(df_db_schema, fingerprint)
 
     st.title("Mid-Range Organisations — New Zealand Public Data")
-    st.error(
-        "⚠ **Not an official government product.** Built by Celnic Consulting "
-        "from publicly published New Zealand open data. Figures marked 🔶 are "
-        "**synthetic** — modelled, not measured. Figures marked ◍ are survey "
-        "estimates and carry confidence intervals.")
+    render_header()
 
     tabs = st.tabs([
         "🏛️ Overview", "💹 Economy", "🌏 Trade & Treaties",
