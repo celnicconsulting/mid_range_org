@@ -1,0 +1,15 @@
+# Theme colours are the app's palette, so the chrome and the charts agree.
+# primaryColor is REAL-blue; a reader who learns the vocabulary in a chart
+# sees the same blue on a widget.
+[theme]
+primaryColor            = "#2a78d6"
+backgroundColor         = "#ffffff"
+secondaryBackgroundColor = "#eef1f5"
+textColor               = "#10161d"
+font                    = "sans serif"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

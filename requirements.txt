@@ -1,0 +1,10 @@
+# Floors, not exact pins: Streamlit Community Cloud resolves within these and a
+# hard pin breaks the build the first time a transitive dependency moves.
+streamlit>=1.40
+duckdb>=1.1
+pandas>=2.2
+pyarrow>=17.0
+plotly>=5.24
+pydeck>=0.9
+h3>=4.1
+openpyxl>=3.1
