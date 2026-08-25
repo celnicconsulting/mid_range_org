@@ -3,3 +3,5 @@ __pycache__/
 *.duckdb.wal
 .streamlit/secrets.toml
 .DS_Store
+.env
+.env.*

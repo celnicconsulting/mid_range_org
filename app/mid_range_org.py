@@ -35,8 +35,10 @@ element here traces to a row of `design/mart_contract.md`.
     3 🌏  Trade & Treaties    real            trade by partner; treaty register
     4 🎲  Civic & Charitable  part synthetic  gaming proceeds; charities register
     5 🩺  Health              real (survey)   NZHS indicators with CIs
-    6 🌡️  Environment         real            GHG inventory; environmental accounts
-    7 🗺️  Places & Property   real            Gazetteer map; property transfers
+    6 🌡️  Environment         real            GHG inventory; MfE river water
+                                          quality; air trends; accounts
+    7 🗺️  Places & Property   real            LINZ cadastre + address density;
+                                          Gazetteer map; property transfers
     8 🔎  Data & Provenance   real            source register, validation, gaps
 
 ====================VISUAL_VOCABULARY====================
@@ -85,6 +87,7 @@ miss.
 from __future__ import annotations
 
 import io
+import json
 from pathlib import Path
 
 import duckdb
@@ -468,6 +471,111 @@ def get_env_accounts(df_db_schema, fingerprint):
 
 
 @st.cache_data(show_spinner=False)
+def get_parcels(df_db_schema, fingerprint, intents, limit=9000):
+    """Cadastral parcels with their exterior ring, ready for a PolygonLayer.
+
+    Bounded by `limit` because pydeck draws every polygon it is handed and a
+    browser will not keep up past roughly ten thousand rings. The count actually
+    drawn is shown beside the map rather than left for the reader to guess.
+    """
+    where = f"AND PARCEL_INTENT IN ({sql_list(intents)})" if intents else ""
+    return run_query(fingerprint, f"""
+        SELECT PARCEL_ID, APPELLATION, PARCEL_INTENT, AREA_M2,
+               LAT, LON, RING_JSON, RING_POINTS
+        FROM M_LINZ_PARCEL
+        WHERE RING_POINTS >= 3 {where}
+        ORDER BY AREA_M2 DESC NULLS LAST
+        LIMIT {limit}
+    """)
+
+
+@st.cache_data(show_spinner=False)
+def get_parcel_intents(df_db_schema, fingerprint):
+    return run_query(fingerprint, """
+        SELECT PARCEL_INTENT, count(*) AS PARCEL_COUNT, sum(AREA_M2) AS AREA_M2
+        FROM M_LINZ_PARCEL GROUP BY ALL ORDER BY PARCEL_COUNT DESC
+    """)
+
+
+@st.cache_data(show_spinner=False)
+def get_address_h3(df_db_schema, fingerprint, resolution):
+    return run_query(fingerprint, f"""
+        SELECT H3_CELL, ADDRESS_COUNT, SUBURB, TERRITORIAL_AUTHORITY, LAT, LON
+        FROM M_LINZ_ADDRESS_H3 WHERE H3_RES = {resolution}
+    """)
+
+
+@st.cache_data(show_spinner=False)
+def get_addresses(df_db_schema, fingerprint, text, limit=5000):
+    where = ""
+    if text:
+        safe = text.replace("'", "''")
+        where = f"WHERE FULL_ADDRESS ILIKE '%{safe}%'"
+    return run_query(fingerprint, f"""
+        SELECT ADDRESS_ID, FULL_ADDRESS, SUBURB, TOWN_CITY,
+               TERRITORIAL_AUTHORITY, LAT, LON
+        FROM M_LINZ_ADDRESS {where} ORDER BY FULL_ADDRESS LIMIT {limit}
+    """)
+
+
+@st.cache_data(show_spinner=False)
+def get_title_summary(df_db_schema, fingerprint):
+    return run_query(fingerprint, """
+        SELECT TITLE_TYPE, TITLE_STATUS, sum(TITLE_COUNT) AS TITLE_COUNT
+        FROM M_LINZ_TITLE_SUMMARY GROUP BY ALL ORDER BY TITLE_COUNT DESC
+    """)
+
+
+@st.cache_data(show_spinner=False)
+def get_river_indicators(df_db_schema, fingerprint):
+    return run_query(fingerprint, """
+        SELECT INDICATOR, MEASURE_CLASS, count(*) AS SEGMENTS
+        FROM M_MFE_RIVER_QUALITY GROUP BY ALL ORDER BY SEGMENTS DESC
+    """)
+
+
+@st.cache_data(show_spinner=False)
+def get_river_quality(df_db_schema, fingerprint, measure_class, limit=30000):
+    return run_query(fingerprint, f"""
+        SELECT SEGMENT_ID, INDICATOR, MEASURE_CLASS, UNITS, VALUE,
+               STREAM_ORDER, LAT, LON
+        FROM M_MFE_RIVER_QUALITY
+        WHERE MEASURE_CLASS = '{measure_class}' AND VALUE IS NOT NULL
+        LIMIT {limit}
+    """)
+
+
+@st.cache_data(show_spinner=False)
+def get_air_trends(df_db_schema, fingerprint):
+    return run_query(fingerprint, """
+        SELECT POLLUTANT, SITE, AIRSHED, TREND_TYPE, LIKELIHOOD,
+               SLOPE_PERCENT, PERIOD_START, PERIOD_END, LAT, LON
+        FROM M_MFE_AIR_TREND WHERE SLOPE_PERCENT IS NOT NULL
+        ORDER BY SLOPE_PERCENT
+    """)
+
+
+@st.cache_data(show_spinner=False)
+def get_ade_population(df_db_schema, fingerprint, period):
+    return run_query(fingerprint, f"""
+        SELECT AREA_NAME, PERIOD, POPULATION
+        FROM M_ADE_POPULATION
+        WHERE PERIOD = '{period}' AND POPULATION IS NOT NULL
+          AND AREA_NAME NOT ILIKE 'Total%'
+        ORDER BY POPULATION DESC
+    """)
+
+
+@st.cache_data(show_spinner=False)
+def get_ade_periods(df_db_schema, fingerprint):
+    return run_query(fingerprint, """
+        SELECT PERIOD, count(*) AS AREAS, sum(POPULATION) AS TOTAL
+        FROM M_ADE_POPULATION WHERE AREA_NAME NOT ILIKE 'Total%'
+        GROUP BY ALL ORDER BY PERIOD
+    """)
+
+
+@st.cache_data(show_spinner=False)
 def get_place_summary(df_db_schema, fingerprint):
     return run_query(fingerprint, "SELECT * FROM M_PLACE_SUMMARY")
 
@@ -792,6 +900,37 @@ def render_tab_overview(df_db_schema, fingerprint, orgs):
         st.plotly_chart(base_layout(fig, "Period covered, first to last", ""),
                         width='stretch')
 
+    st.markdown("---")
+    st.markdown("**Estimated resident population — Stats NZ ADE API**")
+    periods = get_ade_periods(df_db_schema, fingerprint)
+    if periods.empty:
+        st.info("No population estimates in the extract.")
+    else:
+        opts = periods["PERIOD"].tolist()
+        year = st.select_slider("Estimate year", options=opts, value=opts[-1],
+                                key="ade_year")
+        pop = get_ade_population(df_db_schema, fingerprint, year)
+        left, right = st.columns([3, 2])
+        with left:
+            st.plotly_chart(
+                bar_chart(pop, "AREA_NAME", "POPULATION",
+                          f"Estimated resident population, {year}",
+                          REAL, "people", top=15),
+                width='stretch')
+        with right:
+            st.plotly_chart(
+                line_chart([("New Zealand", periods["PERIOD"],
+                             periods["TOTAL"])],
+                           "Total across areas held", "people"),
+                width='stretch')
+        st.caption(
+            "Pulled through the **Stats NZ Aotearoa Data Explorer API** — the "
+            "route the first build could not take. It is also the platform's "
+            "newest cross-source check: the same estimate reached through the "
+            "API and through the bulk CSV download page agree to within 2%, "
+            "and check X4 on the Data & Provenance tab shows it.")
+
+    st.markdown("---")
     render_table_with_export(register, "Agency register", "agency_register")
 
 
@@ -1195,6 +1334,93 @@ def render_tab_health(df_db_schema, fingerprint, orgs):
     render_table_with_export(data, f"{indicator} detail", "health_indicator")
 
 
+def render_freshwater(df_db_schema, fingerprint):
+    """Real MfE river water quality by segment, plus the air-quality trends.
+
+    The other element `design/bridge_gaps.md` marked CUT. Every point is a
+    modelled value MfE published for a real river segment — modelled by the
+    ministry, not by this pipeline, which is a distinction the caption makes
+    rather than leaving to the colour key.
+    """
+    ind = get_river_indicators(df_db_schema, fingerprint)
+    if ind.empty:
+        st.info("No river water quality layers in the extract.")
+        return
+
+    st.markdown("**🌊 Freshwater — river water quality**")
+    c1, c2 = st.columns([3, 2])
+    measure = c1.selectbox(
+        "Measure", ind["MEASURE_CLASS"].tolist(),
+        format_func=lambda m: f"{m}  ({int(ind.loc[ind['MEASURE_CLASS'] == m, 'SEGMENTS'].iloc[0]):,} segments)")
+    scale = c2.radio("Colour scale", ["Value", "Stream order"],
+                     horizontal=True)
+
+    seg = get_river_quality(df_db_schema, fingerprint, measure)
+    if seg.empty:
+        st.info("No segments for that measure.")
+        return
+
+    col = "VALUE" if scale == "Value" else "STREAM_ORDER"
+    series = pd.to_numeric(seg[col], errors="coerce")
+    lo, hi = series.quantile(0.05), series.quantile(0.95)
+    span = (hi - lo) or 1.0
+    d = seg.copy()
+    # Degraded is worse, so this ramp runs light to dark on a single hue rather
+    # than red-to-green, which would assert a good/bad judgement the state
+    # classes make categorically and this numeric value does not.
+    d["FILL"] = series.apply(
+        lambda v: [int(232 - 190 * min(max((v - lo) / span, 0), 1)),
+                   int(238 - 150 * min(max((v - lo) / span, 0), 1)),
+                   int(252 - 60 * min(max((v - lo) / span, 0), 1)), 190]
+        if pd.notna(v) else [180, 190, 200, 90])
+
+    st.pydeck_chart(pdk.Deck(
+        layers=[pdk.Layer(
+            "ScatterplotLayer", d, get_position=["LON", "LAT"],
+            get_fill_color="FILL", get_radius=90, radius_min_pixels=1,
+            radius_max_pixels=6, pickable=True, stroked=False)],
+        initial_view_state=pdk.ViewState(
+            latitude=-41.10, longitude=175.20, zoom=7.4, pitch=0),
+        tooltip={"html": "<b>{MEASURE_CLASS}</b><br/>{VALUE} {UNITS}<br/>"
+                         "stream order {STREAM_ORDER}<br/>segment {SEGMENT_ID}",
+                 "style": {"backgroundColor": "#10161d", "color": "white"}},
+        map_style="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"))
+    st.caption(
+        f"**Real.** {len(seg):,} river segments, {measure}, modelled by the "
+        "Ministry for the Environment for 2016–2020 and published on the MfE "
+        "Data Service. The modelling is the ministry's, not this pipeline's — "
+        "these are published figures, not derived ones. Clipped to the "
+        "Wellington region at download, the same extent as the cadastre.")
+
+    trends = get_air_trends(df_db_schema, fingerprint)
+    if not trends.empty:
+        left, right = st.columns(2)
+        with left:
+            worst = trends.sort_values("SLOPE_PERCENT").head(15).copy()
+            worst["LABEL"] = worst["SITE"].astype(str).str.slice(0, 24) +                 " · " + worst["POLLUTANT"].astype(str)
+            st.plotly_chart(
+                bar_chart(worst, "LABEL", "SLOPE_PERCENT",
+                          "Air quality trend by site (% a year)",
+                          COMPARE, "% per year", top=15),
+                width='stretch')
+        with right:
+            by_poll = (trends.groupby("POLLUTANT")["SLOPE_PERCENT"]
+                       .mean().reset_index()
+                       .sort_values("SLOPE_PERCENT"))
+            st.plotly_chart(
+                bar_chart(by_poll, "POLLUTANT", "SLOPE_PERCENT",
+                          "Mean trend by pollutant", COMPARE, "% per year",
+                          top=10),
+                width='stretch')
+        st.caption(
+            "Negative is improving — concentrations falling. Trends are MfE's "
+            "own published slopes, with their own likelihood classification; "
+            "no trend is fitted here.")
+
+    render_table_with_export(seg, f"River segments — {measure}",
+                             "mfe_river_quality")
+
+
 def render_tab_environment(df_db_schema, fingerprint, orgs):
     """The GHG inventory by submission and gas, the cross-source pair, accounts."""
     st.subheader("🌡️ Environment")
@@ -1301,18 +1527,136 @@ def render_tab_environment(df_db_schema, fingerprint, orgs):
                            "Environmental-economic accounts"),
                 width='stretch')
 
+    st.markdown("---")
+    render_freshwater(df_db_schema, fingerprint)
+
+    st.markdown("---")
     render_table_with_export(inv, f"Inventory detail — {gas}, {submission}",
                              "ghg_inventory")
+
+
+def render_cadastre(df_db_schema, fingerprint):
+    """The LINZ cadastre: real parcel polygons over real address-point density.
+
+    This is the element `design/bridge_gaps.md` marked CUT when no API key was
+    available. Both layers are real LINZ data — no synthetic geography anywhere
+    on this tab.
+
+    Two extents, stated rather than implied: the polygons cover Wellington City
+    inner suburbs because a browser will not draw more rings than that, and the
+    address density covers the whole Wellington region because an H3 cell costs
+    the same whatever it aggregates.
+    """
+    intents = get_parcel_intents(df_db_schema, fingerprint)
+    c1, c2, c3 = st.columns([3, 2, 2])
+    chosen = c1.multiselect(
+        "Parcel intent", intents["PARCEL_INTENT"].dropna().tolist(),
+        default=[i for i in ["Fee Simple Title", "Road"]
+                 if i in set(intents["PARCEL_INTENT"].dropna())])
+    resolution = c2.slider("Address H3 resolution", 7, 10, 8,
+                           help="Derived from the real address points, not a "
+                                "bridge table of invented centroids.")
+    show_addresses = c3.toggle("Address density", value=True)
+
+    parcels = get_parcels(df_db_schema, fingerprint, chosen)
+    cells = get_address_h3(df_db_schema, fingerprint, resolution)         if show_addresses else pd.DataFrame()
+
+    m = st.columns(4)
+    m[0].metric("Parcels drawn", fmt(len(parcels)))
+    m[1].metric("Parcels held", fmt(intents["PARCEL_COUNT"].sum()),
+                help="Wellington City inner extent, in the published extract.")
+    m[2].metric("Address cells", fmt(len(cells)) if not cells.empty else "—")
+    m[3].metric("Addresses aggregated",
+                fmt(cells["ADDRESS_COUNT"].sum()) if not cells.empty else "—")
+
+    layers = []
+    if not cells.empty:
+        peak = float(cells["ADDRESS_COUNT"].max()) or 1.0
+        d = cells.copy()
+        # Single hue, light to dark — never a rainbow.
+        d["FILL"] = d["ADDRESS_COUNT"].apply(
+            lambda v: [int(214 - 172 * (v / peak)),
+                       int(230 - 110 * (v / peak)),
+                       int(250 - 40 * (v / peak)), 150])
+        layers.append(pdk.Layer(
+            "H3HexagonLayer", d, get_hexagon="H3_CELL", get_fill_color="FILL",
+            get_line_color=[255, 255, 255, 25], pickable=True, stroked=True,
+            filled=True, extruded=False, line_width_min_pixels=0))
+
+    if not parcels.empty:
+        pl = parcels.copy()
+        pl["POLYGON"] = pl["RING_JSON"].apply(
+            lambda r: json.loads(r) if r else [])
+        pl = pl[pl["POLYGON"].map(len) >= 3]
+        layers.append(pdk.Layer(
+            "PolygonLayer", pl, get_polygon="POLYGON",
+            get_fill_color=[42, 120, 214, 55],
+            get_line_color=[42, 120, 214, 205],
+            line_width_min_pixels=1, pickable=True, stroked=True, filled=True))
+
+    if layers:
+        st.pydeck_chart(pdk.Deck(
+            layers=layers,
+            initial_view_state=pdk.ViewState(
+                latitude=-41.2865, longitude=174.7762, zoom=12.5, pitch=0),
+            tooltip={"html": "<b>{APPELLATION}</b><br/>{PARCEL_INTENT}<br/>"
+                             "{AREA_M2} m²<br/>{ADDRESS_COUNT} addresses "
+                             "{SUBURB}",
+                     "style": {"backgroundColor": "#10161d", "color": "white"}},
+            map_style="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"))
+    else:
+        st.info("No parcels for the selected intents.")
+
+    st.caption(
+        f"**Real LINZ cadastre.** {len(parcels):,} parcel polygons drawn of "
+        f"{int(intents['PARCEL_COUNT'].sum()):,} in the extract; rings are "
+        "simplified to 1 m precision and at most 24 vertices, which is finer "
+        "than a screen pixel at this zoom. Address density aggregates all "
+        "215,703 regional address points. Ownership names were never "
+        "downloaded — this is the titles-without-owners layer, privacy by "
+        "design. Sourced from Toitū Te Whenua Land Information New Zealand "
+        "data. Crown copyright reserved.")
+
+    titles = get_title_summary(df_db_schema, fingerprint)
+    left, right = st.columns(2)
+    with left:
+        if not titles.empty:
+            st.plotly_chart(
+                bar_chart(titles, "TITLE_TYPE", "TITLE_COUNT",
+                          "Property titles by estate type", REAL, "titles"),
+                width='stretch')
+    with right:
+        if not intents.empty:
+            st.plotly_chart(
+                bar_chart(intents, "PARCEL_INTENT", "PARCEL_COUNT",
+                          "Parcels by intent", REAL, "parcels"),
+                width='stretch')
+
+    text = st.text_input("Address contains", key="addr_search")
+    render_table_with_export(
+        get_addresses(df_db_schema, fingerprint, text),
+        "Address points", "linz_addresses")
 
 
 def render_tab_places(df_db_schema, fingerprint, orgs):
     """The Gazetteer map, features by region, property transfers."""
     st.subheader("🗺️ Places & Property")
-    st.caption(
-        "The LINZ packet specifies a cadastral parcel map over the LINZ Data "
-        "Service, which needs an API key excluded from this build. That layer is "
-        "**cut**; this map is built on the New Zealand Gazetteer instead — real, "
-        "national, and served without registration.")
+
+    view = st.radio(
+        "Map layer", ["Cadastre — parcels & address density", "Place names"],
+        horizontal=True,
+        help="The cadastre is the LINZ packet's showpiece and needed a Data "
+             "Service key. The place-names map covers the whole country; the "
+             "cadastre covers Wellington.")
+
+    if view.startswith("Cadastre"):
+        render_cadastre(df_db_schema, fingerprint)
+        st.markdown("---")
+
+    if not view.startswith("Cadastre"):
+        st.caption(
+            "The New Zealand Gazetteer — real, national, and the layer this map "
+            "was built on before the LINZ Data Service key was available.")
 
     summary = get_place_summary(df_db_schema, fingerprint)
     transfers = get_property_transfers(df_db_schema, fingerprint)
