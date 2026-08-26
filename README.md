@@ -108,4 +108,4 @@ licences (CC-BY 4.0; CC-BY 3.0 NZ for the Charities Register). Code is MIT — s
 No person is named anywhere in this platform: the Charities Register's Officers
 entity was never downloaded, and direct contact details were dropped at staging.
 
-Built by [Celnic Consulting](mailto:consult@celnic.nz).
+Built by Celnic Consulting.

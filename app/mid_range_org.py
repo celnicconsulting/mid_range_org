@@ -13,9 +13,9 @@ element here traces to a row of `design/mart_contract.md`.
     │ ──────────────       │  ├──────────────────────────────────────────┤  │
     │ Organisation         │  │ ⚠ BUILT FROM NEW ZEALAND GOVERNMENT DATA │  │
     │ ☑ DIA ☑ CUS ☑ SNZ    │  │   — NOT AN OFFICIAL GOVERNMENT PRODUCT   │  │
-    │ ☑ MFT ☑ LNZ ☑ MFE    │  │   the seven agencies, named              │  │
-    │ ☑ MOH                │  │  ────────────────────────────────────    │  │
-    │                      │  │   🔶 SYNTHETIC · ◍ survey · gap ≠ zero   │  │
+    │ ☑ MFT ☑ LNZ ☑ MFE    │  │   the seven agencies, named; produced    │  │
+    │ ☑ MOH                │  │   independently; every source file is    │  │
+    │                      │  │   listed in 🔎 Data & Provenance         │  │
     │ ──────────────       │  ├──────────────────────────────────────────┤  │
     │ PROVENANCE           │  │▨▨▨▨ 45° hazard stripe, #FFD100 on #111 ▨▨│  │
     │ ● REAL — measured    │  └──────────────────────────────────────────┘  │
@@ -88,6 +88,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 from pathlib import Path
 
 import duckdb
@@ -126,6 +127,17 @@ ORG_NAMES = {
 
 # ====================SESSION====================
 APP_DIR = Path(__file__).resolve().parent
+
+# The Method tab renders a markdown document loaded from disk at run time, not
+# embedded in this module. One copy, always current, and never a second that can
+# fall out of date with the build it describes.
+REFERENCE_DIRS = [
+    os.environ.get("MID_RANGE_ORG_REFERENCE_DIR", ""),
+    str(APP_DIR.parent / "reference"),
+    str(APP_DIR.parent),
+]
+METHOD_DOC = "README_PHASE_TWO.md"
+
 DB_CANDIDATES = [
     APP_DIR.parent / "data" / "mid_range_org_public.duckdb",     # public_repo
     APP_DIR.parent / "public" / "mid_range_org_public.duckdb",   # working project
@@ -646,6 +658,25 @@ def get_table(df_db_schema, fingerprint, table, org=None, limit=6000):
     return run_query(fingerprint, f"SELECT * FROM {table} {where} LIMIT {limit}")
 
 
+@st.cache_data(show_spinner=False)
+def get_reference_doc(file_name):
+    """Load a markdown reference document from disk, verbatim.
+
+    Returns the text, or None when no copy is on the search path, so a
+    deployment shipped without the document renders a short notice rather than
+    failing. Nothing here interprets the file: it is displayed as the markdown
+    it already is.
+    """
+    for folder in REFERENCE_DIRS:
+        if not folder:
+            continue
+        path = Path(folder) / file_name
+        if path.exists():
+            with io.open(path, encoding="utf-8") as fh:
+                return fh.read()
+    return None
+
+
 # ====================STATIC_METHODS====================
 def build_styled_excel(df: pd.DataFrame, title: str) -> bytes:
     """A branded workbook: title bar, styled header, frozen panes, auto-filter."""
@@ -765,18 +796,18 @@ def fmt(value, prefix="", suffix="", dp=0):
 
 
 def render_header():
-    """Hazard-striped provenance banner, shown above every tab.
+    """Hazard-striped provenance banner shown above every tab.
 
-    Drawn as raw HTML rather than `st.error` so the stripes survive both
-    Streamlit themes and both host themes: a 3px black frame, a 14px
-    yellow-and-black 45-degree stripe band top and bottom, and a solid #FFD100
-    panel between them. Matches the MSD platform's banner so the two read as one
-    family.
+    Drawn as raw HTML rather than st.warning so the stripes survive both
+    Streamlit themes: a 3px black frame, a 14px yellow-and-black 45-degree
+    stripe band top and bottom, and a solid #FFD100 panel between them.
+
+    The wording is the Celnic house form, shared with the MSD platform so the
+    two read as one family — only the agency names and the tab reference differ.
 
     The application is built from public releases but is not published by, nor
-    endorsed by, the seven agencies that produced them, so that is stated before
-    any figure is shown rather than buried in a footnote. The synthetic and
-    survey markers are defined here too, because a reader meets them on tab 1.
+    endorsed by, the agencies that produced them, so that is stated before any
+    figure is shown rather than buried in a footnote.
     """
     st.html(
         """
@@ -798,17 +829,9 @@ def render_header():
               <b>Ministry for the Environment</b> and the
               <b>Ministry of Health</b>.
               This application is produced independently by Celnic Consulting and
-              <b>does not represent the views, policy or official statistics of
-              those departments</b>.
-            </div>
-            <div style="font-size:13.5px; line-height:1.5; margin-top:8px;
-                        border-top:1px solid rgba(17,17,17,.28); padding-top:8px;">
-              &#128310; marks a <b>SYNTHETIC</b> figure &mdash; modelled, not
-              measured. &#9677; marks a <b>survey estimate</b>, always drawn with
-              its confidence interval. Suppressed values are shown as a
-              <b>gap, never as zero</b>. Every source file, with its download date
-              and checksum, is listed in the
-              <b>&#128270; Data &amp; Provenance</b> tab.
+              <b>does not represent the views, policy or official statistics of those
+              departments</b>. Every original source file, with its download date and
+              checksum, is listed in the <b>&#128270; Data &amp; Provenance</b> tab.
             </div>
           </div>
           <div style="height:14px; background:repeating-linear-gradient(
@@ -1738,6 +1761,46 @@ def render_tab_places(df_db_schema, fingerprint, orgs):
         "Gazetteer detail", "gazetteer")
 
 
+def render_tab_method(df_db_schema, fingerprint, orgs):
+    """Method — the Phase Two build write-up, rendered from its own markdown file.
+
+      caption naming the document and stating it is loaded, not embedded
+      3:1 header row: heading | download the original markdown
+      the document, verbatim
+
+    The text is read at run time rather than held in this module, so the tab
+    always shows the current write-up and there is never a second copy of it to
+    fall out of date with the build it describes.
+    """
+    st.header("How this was built")
+    st.caption(
+        f"The Phase Two write-up, loaded from {METHOD_DOC} and rendered "
+        "unchanged. It records how the three keyed services were fetched, what "
+        "the bounding box and the SDMX key did silently wrong on the way, and "
+        "why the extract had to shed 27 MB without dropping a single parcel."
+    )
+
+    doc = get_reference_doc(METHOD_DOC)
+    if doc is None:
+        st.info(
+            f"{METHOD_DOC} is not on the reference path for this deployment. "
+            "Point MID_RANGE_ORG_REFERENCE_DIR at the folder holding it."
+        )
+        return
+
+    hdr, dl = st.columns([3, 1])
+    with hdr:
+        st.markdown(f"#### 📄 {METHOD_DOC}")
+    with dl:
+        st.download_button(
+            "📥 Markdown", data=doc.encode("utf-8"), file_name=METHOD_DOC,
+            mime="text/markdown", key="dl_method_md", type="primary",
+            width='stretch')
+
+    st.markdown("---")
+    st.markdown(doc)
+
+
 def render_tab_provenance(df_db_schema, fingerprint, orgs):
     """Validation, the source register, coverage, and what was left out."""
     st.subheader("🔎 Data & Provenance")
@@ -1804,12 +1867,12 @@ def main():
     tabs = st.tabs([
         "🏛️ Overview", "💹 Economy", "🌏 Trade & Treaties",
         "🎲 Civic & Charitable", "🩺 Health", "🌡️ Environment",
-        "🗺️ Places & Property", "🔎 Data & Provenance"])
+        "🗺️ Places & Property", "🔎 Data & Provenance", "📐 Method"])
 
     renderers = [
         render_tab_overview, render_tab_economy, render_tab_trade,
         render_tab_civic, render_tab_health, render_tab_environment,
-        render_tab_places, render_tab_provenance]
+        render_tab_places, render_tab_provenance, render_tab_method]
 
     for tab, render in zip(tabs, renderers):
         with tab:
