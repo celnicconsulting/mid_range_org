@@ -1,6 +1,6 @@
-# ====================MID_RANGE_ORG_PHASE_TWO====================
+# ====================MID_RANGE_ORG_BUILD_NOTES====================
 
-# Phase Two — Keyed Sources, Restored Maps and the Cross-Source Check
+# How this platform was built
 
 **Status:** Complete. All 18 validation checks pass.
 **Built:** 24–26 August 2026
@@ -15,20 +15,21 @@ python -m streamlit run app/mid_range_org.py --server.port 8520
 
 ---
 
-# ====================WHAT_PHASE_TWO_WAS====================
+# ====================THE_SHAPE_OF_IT====================
 
-Phase One built the platform from everything obtainable **without registering for
-anything**. Three sources named in the work packets needed a free API key, and
-were excluded at the outset rather than half-built:
+The platform was built in two passes, and the split is worth knowing because it
+is visible in the design documents.
 
-- the **LINZ Data Service** — parcels, titles, addresses
-- the **MfE Data Service** — river, lake, groundwater and air monitoring
-- the **Stats NZ Aotearoa Data Explorer API**
+The **first pass** used everything obtainable *without registering for anything*.
+Three sources named in the work packets needed a free API key — the **LINZ Data
+Service** (parcels, titles, addresses), the **MfE Data Service** (river, lake,
+groundwater and air monitoring) and the **Stats NZ Aotearoa Data Explorer API** —
+and were excluded at the outset rather than half-built. Two map elements had to
+be marked `CUT` in `design/bridge_gaps.md` as a direct consequence.
 
-Two map elements had to be marked `CUT` in `design/bridge_gaps.md` as a direct
-consequence. Phase Two is what happened when the keys arrived.
+The **second pass** is what happened when the keys arrived.
 
-| | Phase One | Phase Two |
+| | Without keys | With keys |
 |---|---|---|
 | Sources | 32 registered, 215 files | + 3 keyed services, 12 layers |
 | RAW | 814 tables, 31.4 M rows | 826 tables, 41.8 M rows |
@@ -46,8 +47,7 @@ whole argument for waiting for the keys rather than approximating.
 
 # ====================THE_PLAN_FLIPPED_DRIVING_FROM_BUSINESS_OUTCOME====================
 
-Same discipline as Phase One: the interface element came first, and the fetch was
-designed to serve it. Each restored element was reduced to the question it has to
+The interface element came first, and the fetch was designed to serve it. Each restored element was reduced to the question it has to
 answer, and each question to the grain that answers it.
 
 | Element | Question | Grain required | Fact built |
@@ -138,7 +138,7 @@ WFS layer is one conversation with one server.
 
 ## The bounding box is silent about being wrong
 
-This cost the most time of anything in Phase Two.
+This cost the most time of anything in the build.
 
 ```
 cql_filter=bbox(shape,174.6,-41.4,175.2,-40.8)   →  HTTP 200, 0 features
@@ -330,7 +330,7 @@ order — the exact failure that returns zero features without an error.
 
 ## Tabs
 
-| Tab | Provenance | Phase Two change |
+| Tab | Provenance | What the keys added |
 |---|---|---|
 | 🏛️ Overview | real | **+ estimated resident population from the ADE API** |
 | 💹 Economy | real | — |
@@ -368,8 +368,8 @@ time and layers matched by title. A renumbered layer is still found.
 **The Census topic explorer stays cut.** The ADE key works and the 2023 Census
 dataflows are visible, but each topic is a separate cube with its own dimensions.
 That is a build of its own, not a tail-end of this one. Ten of the original
-thirteen cuts remain — three fewer than Phase One, and the reasons for the rest
-are unchanged.
+thirteen cuts remain — three fewer than before the keys, and the reasons for the
+rest are unchanged.
 
 **Two extents on one tab, stated.** Parcels cover Wellington City inner suburbs
 because a browser will not draw more rings than that. Address density covers the
@@ -418,7 +418,7 @@ and leave the rest silently absent.
 
 ---
 
-# ====================WHAT_PHASE_THREE_WOULD_BE====================
+# ====================WHAT_COMES_NEXT====================
 
 1. **Census 2023 topic tables** — the population map at SA2 grain, and the topic
    explorer the Stats NZ packet asked for.

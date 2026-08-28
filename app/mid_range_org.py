@@ -40,6 +40,8 @@ element here traces to a row of `design/mart_contract.md`.
     7 🗺️  Places & Property   real            LINZ cadastre + address density;
                                           Gazetteer map; property transfers
     8 🔎  Data & Provenance   real            source register, validation, gaps
+    9 📐  Method              real            the build write-up, loaded at run
+                                          time from mid_range_org__readme.md
 
 ====================VISUAL_VOCABULARY====================
 
@@ -136,7 +138,8 @@ REFERENCE_DIRS = [
     str(APP_DIR.parent / "reference"),
     str(APP_DIR.parent),
 ]
-METHOD_DOC = "README_PHASE_TWO.md"
+# Named for the app module it documents, so the pair stay obviously together.
+METHOD_DOC = "mid_range_org__readme.md"
 
 DB_CANDIDATES = [
     APP_DIR.parent / "data" / "mid_range_org_public.duckdb",     # public_repo
@@ -1762,7 +1765,7 @@ def render_tab_places(df_db_schema, fingerprint, orgs):
 
 
 def render_tab_method(df_db_schema, fingerprint, orgs):
-    """Method — the Phase Two build write-up, rendered from its own markdown file.
+    """Method — the build write-up, rendered from its own markdown file.
 
       caption naming the document and stating it is loaded, not embedded
       3:1 header row: heading | download the original markdown
@@ -1774,10 +1777,10 @@ def render_tab_method(df_db_schema, fingerprint, orgs):
     """
     st.header("How this was built")
     st.caption(
-        f"The Phase Two write-up, loaded from {METHOD_DOC} and rendered "
-        "unchanged. It records how the three keyed services were fetched, what "
-        "the bounding box and the SDMX key did silently wrong on the way, and "
-        "why the extract had to shed 27 MB without dropping a single parcel."
+        f"The build write-up, loaded from {METHOD_DOC} and rendered unchanged. "
+        "It records how the seven agencies' data was found and fetched, what the "
+        "bounding box and the SDMX key did silently wrong on the way, and why "
+        "the extract had to shed 27 MB without dropping a single parcel."
     )
 
     doc = get_reference_doc(METHOD_DOC)
