@@ -805,8 +805,18 @@ def render_header():
     Streamlit themes: a 3px black frame, a 14px yellow-and-black 45-degree
     stripe band top and bottom, and a solid #FFD100 panel between them.
 
-    The wording is the Celnic house form, shared with the MSD platform so the
-    two read as one family — only the agency names and the tab reference differ.
+    The wording is the Celnic house form, shared with the MSD and Kāinga Ora
+    platforms so the three read as one family. Two clauses matter beyond the
+    boilerplate: the purpose, which says why the application exists at all, and
+    the instruction to use the original figures rather than these — because a
+    reader who takes a number off a chart here and puts it in a report has
+    misunderstood what this is for.
+
+    This platform names its seven agencies rather than pointing at the
+    provenance tab, which is the one deliberate departure from the Kāinga Ora
+    form. Naming them risks a stale list if another source is added; it was
+    asked for, and the trade is recorded here so the next person knows it was a
+    choice.
 
     The application is built from public releases but is not published by, nor
     endorsed by, the agencies that produced them, so that is stated before any
@@ -831,10 +841,15 @@ def render_header():
               <b>Land Information New Zealand</b>, the
               <b>Ministry for the Environment</b> and the
               <b>Ministry of Health</b>.
-              This application is produced independently by Celnic Consulting and
-              <b>does not represent the views, policy or official statistics of those
-              departments</b>. Every original source file, with its download date and
-              checksum, is listed in the <b>&#128270; Data &amp; Provenance</b> tab.
+              This application is produced independently by
+              <b>Celnic Consulting</b> for the purpose of showing the benefits of
+              Flipping the Data Team, and
+              <b>does not represent the views, policy or official statistics of
+              those departments</b>.
+              <b>Please refer to the original figures in the data source and do
+              not rely on these.</b>
+              Every original source file, with its download date and checksum,
+              is listed in the <b>&#128270; Data &amp; Provenance</b> tab.
             </div>
           </div>
           <div style="height:14px; background:repeating-linear-gradient(
