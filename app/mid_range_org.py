@@ -40,7 +40,7 @@ element here traces to a row of `design/mart_contract.md`.
     7 🗺️  Places & Property   real            LINZ cadastre + address density;
                                           Gazetteer map; property transfers
     8 🔎  Data & Provenance   real            source register, validation, gaps
-    9 📐  Method              real            the build write-up, loaded at run
+    9 🏗️  Build Notes         real            the build write-up, loaded at run
                                           time from mid_range_org__readme.md
 
 ====================VISUAL_VOCABULARY====================
@@ -139,7 +139,7 @@ REFERENCE_DIRS = [
     str(APP_DIR.parent),
 ]
 # Named for the app module it documents, so the pair stay obviously together.
-METHOD_DOC = "mid_range_org__readme.md"
+BUILD_NOTES_DOC = "mid_range_org__readme.md"
 
 DB_CANDIDATES = [
     APP_DIR.parent / "data" / "mid_range_org_public.duckdb",     # public_repo
@@ -1764,40 +1764,39 @@ def render_tab_places(df_db_schema, fingerprint, orgs):
         "Gazetteer detail", "gazetteer")
 
 
-def render_tab_method(df_db_schema, fingerprint, orgs):
-    """Method — the build write-up, rendered from its own markdown file.
+def render_tab_build_notes(df_db_schema, fingerprint, orgs):
+    """Build Notes — the build write-up, rendered from its own markdown file.
 
-      caption naming the document and stating it is loaded, not embedded
-      3:1 header row: heading | download the original markdown
+      H2  Build Notes                            + caption
+      3:1 header row: 📐 Design, build and validation | download the markdown
       the document, verbatim
 
     The text is read at run time rather than held in this module, so the tab
     always shows the current write-up and there is never a second copy of it to
     fall out of date with the build it describes.
     """
-    st.header("How this was built")
+    st.header("Build Notes")
     st.caption(
-        f"The build write-up, loaded from {METHOD_DOC} and rendered unchanged. "
-        "It records how the seven agencies' data was found and fetched, what the "
-        "bounding box and the SDMX key did silently wrong on the way, and why "
-        "the extract had to shed 27 MB without dropping a single parcel."
+        "How the platform was designed and built: the transformation layer, the "
+        "mart contract, the synthetic data, and what deployment taught. This is "
+        "the project's build document, rendered from markdown."
     )
 
-    doc = get_reference_doc(METHOD_DOC)
+    doc = get_reference_doc(BUILD_NOTES_DOC)
     if doc is None:
         st.info(
-            f"{METHOD_DOC} is not on the reference path for this deployment. "
+            f"{BUILD_NOTES_DOC} is not on the reference path for this deployment. "
             "Point MID_RANGE_ORG_REFERENCE_DIR at the folder holding it."
         )
         return
 
     hdr, dl = st.columns([3, 1])
     with hdr:
-        st.markdown(f"#### 📄 {METHOD_DOC}")
+        st.markdown("#### 📐 Design, build and validation")
     with dl:
         st.download_button(
-            "📥 Markdown", data=doc.encode("utf-8"), file_name=METHOD_DOC,
-            mime="text/markdown", key="dl_method_md", type="primary",
+            "📥 Markdown", data=doc.encode("utf-8"), file_name=BUILD_NOTES_DOC,
+            mime="text/markdown", key="dl_build_notes_md", type="primary",
             width='stretch')
 
     st.markdown("---")
@@ -1870,12 +1869,12 @@ def main():
     tabs = st.tabs([
         "🏛️ Overview", "💹 Economy", "🌏 Trade & Treaties",
         "🎲 Civic & Charitable", "🩺 Health", "🌡️ Environment",
-        "🗺️ Places & Property", "🔎 Data & Provenance", "📐 Method"])
+        "🗺️ Places & Property", "🔎 Data & Provenance", "🏗️ Build Notes"])
 
     renderers = [
         render_tab_overview, render_tab_economy, render_tab_trade,
         render_tab_civic, render_tab_health, render_tab_environment,
-        render_tab_places, render_tab_provenance, render_tab_method]
+        render_tab_places, render_tab_provenance, render_tab_build_notes]
 
     for tab, render in zip(tabs, renderers):
         with tab:

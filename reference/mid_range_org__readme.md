@@ -1,6 +1,53 @@
-# ====================MID_RANGE_ORG_BUILD_NOTES====================
+# Flipping the Data Team — example driving from business outcome
 
-# How this platform was built
+The usual order is to model the data first and hope a useful application falls
+out of it. This platform was built the other way round: the application spec came
+first, and the transformation layer was designed to serve it.
+
+Each tab was reduced to the single question it has to answer, and each question
+to the grain that answers it. Only then was a mart table written — and a table
+that no question needed was not built at all.
+
+What follows is that reasoning, in the order it happened, with the places the
+data refused to cooperate left in.
+
+**Built from public releases by the Department of Internal Affairs, the New
+Zealand Customs Service, Stats NZ, the Ministry of Foreign Affairs and Trade,
+Land Information New Zealand, the Ministry for the Environment and the Ministry
+of Health.** All 18 reconciliation checks pass. The published extract is 43.8 MB.
+
+---
+
+# ====================THE_QUESTIONS_CAME_FIRST====================
+
+| Tab | Question | Grain required | Mart table built |
+|---|---|---|---|
+| 🏛️ Overview | What do these seven agencies publish, and how many people live where? | one row per agency; area × year | `M_ORG_REGISTER`, `M_PLATFORM_SUMMARY`, `M_ADE_POPULATION` |
+| 💹 Economy | What are the headline economic series doing? | period × series | `M_ECON_SERIES`, `M_ECON_SERIES_CATALOG` |
+| 🌏 Trade & Treaties | Who does New Zealand trade with, and what has it signed? | quarter × country × HS chapter; treaty | `M_TRADE_BY_COUNTRY`, `M_TRADE_BY_HS2`, `M_TREATY` |
+| 🎲 Civic & Charitable | Where does gambling money come from, and who are the charities? | quarter × territorial authority; charity × return year | `M_GMP_TA`, `M_GMP_PER_CAPITA`, `SYN_VENUE_GMP`, `M_CHARITY` |
+| 🩺 Health | How healthy are we, and does it differ by group and place? | survey year × indicator × breakdown × geography | `M_HEALTH_INDICATOR`, `M_LIFE_EXPECTANCY` |
+| 🌡️ Environment | What are we emitting, and how clean is the water and air? | submission × gas × sector × year; river segment × measure | `M_GHG_INVENTORY`, `M_GHG_CROSS_SOURCE`, `M_MFE_RIVER_QUALITY` |
+| 🗺️ Places & Property | What does the land look like, and what is it called? | parcel; H3 cell; named feature | `M_LINZ_PARCEL`, `M_LINZ_ADDRESS_H3`, `M_PLACE_NAME` |
+| 🔎 Data & Provenance | Can I trust any of this? | file, check, lineage | `M_PIPELINE_*`, `M_VALIDATION_RESULTS` |
+| 🏗️ Build Notes | How was it built, and what went wrong on the way? | — | this document |
+
+**What that analysis forced into the design**, working back from the questions:
+
+1. Every tab needs a **period, a place and a measure**, so the facts share one
+   conformed shape rather than mirroring each agency's worksheets.
+2. Two agencies publishing the same figure are **two series, not one** — hence
+   `M_GHG_CROSS_SOURCE`, drawn as two lines and never averaged.
+3. A number this pipeline computed must never look measured — hence `IS_DERIVED`
+   on every per-capita row and `IS_SYNTHETIC` on every venue.
+4. A suppressed cell is not a zero — hence a suppression symbol beside every
+   NULL, and a gap rather than a zero on every chart.
+5. A picker must never offer what the trimmed fact cannot answer — hence the
+   catalogues are rebuilt from the trimmed extract rather than copied.
+
+---
+
+# ====================THE_BUILD====================
 
 **Status:** Complete. All 18 validation checks pass.
 **Built:** 24–26 August 2026
