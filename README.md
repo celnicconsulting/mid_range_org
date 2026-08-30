@@ -1,5 +1,11 @@
 # Mid-Range Organisations — New Zealand Public Data
 
+> **Data & licence.** Built on open data used under CC BY 4.0 — see
+> [ATTRIBUTION.md](ATTRIBUTION.md) and [DATA_SOURCES.yaml](DATA_SOURCES.yaml)
+> for every source, licence, and modification. Demonstration of method only:
+> the data is modified and partly synthetic, and must not be relied on for
+> operational, policy, or reporting purposes.
+
 A Streamlit application over seven New Zealand government agencies' open data,
 built end to end from public sources: discovery, download, a faithful landing
 layer, staging, a design-driven mart, and one clearly labelled synthetic table.
@@ -99,13 +105,32 @@ results, and the list of RAW tables staging did not consume with a reason for
 each.
 
 Data is New Zealand government open data under Creative Commons Attribution
-licences (CC-BY 4.0; CC-BY 3.0 NZ for the Charities Register). Code is MIT — see
-`LICENSE`.
+licences (CC-BY 4.0; CC-BY 3.0 NZ for the Charities Register).
+[DATA_SOURCES.yaml](DATA_SOURCES.yaml) records the licence, retrieval date and
+modifications dataset by dataset, and [ATTRIBUTION.md](ATTRIBUTION.md) gives the
+attribution each licence requires. A handful of datasets carry a licence this
+build could not confirm; they are flagged in both files rather than quietly
+published under a blanket claim.
 
 > Sourced from Toitū Te Whenua Land Information New Zealand data. Crown copyright
 > reserved.
 
 No person is named anywhere in this platform: the Charities Register's Officers
 entity was never downloaded, and direct contact details were dropped at staging.
+
+---
+
+## Licence
+
+Two licences apply, to two different things.
+
+| | Covers | File |
+|---|---|---|
+| **MIT** | the code in this repository — the app, its configuration, and the documentation written for this build | [`LICENSE`](LICENSE) |
+| **Publishers' own licences** | the data — CC BY 4.0 for most of it, CC BY 3.0 NZ for the Charities Register, and several datasets still to be confirmed | [`LICENSE-DATA`](LICENSE-DATA) |
+
+The MIT licence grants you nothing in the source data. Per-dataset provenance is
+in [DATA_SOURCES.yaml](DATA_SOURCES.yaml); the required attribution is in
+[ATTRIBUTION.md](ATTRIBUTION.md).
 
 Built by Celnic Consulting.

@@ -1,0 +1,701 @@
+# DATA_SOURCES.yaml - provenance and licence manifest
+generated_by: show-me-org attribution pass, 2026-08-30
+repository: https://github.com/celnicconsulting/mid_range_org
+note: >
+  This repository publishes derived artefacts only (the extracts the app
+  reads). The raw downloads and staging tables named under upstream_files live
+  in the private working tree and are not redistributed here.
+
+  Every dataset below is registered in scripts/org_sources.py in the working
+  tree; the id used here is that registry's dataset_id, so a row can be traced
+  to the packet section it came from. `licence_basis` records WHERE the licence
+  claim comes from, because the distinction between a licence read off a
+  dataset's own page and one inherited from an agency-level note is the whole
+  point of this manifest.
+
+  A single file, data/mid_range_org_public.duckdb, carries every derived
+  artefact. `tables` names the tables inside it that a dataset feeds, so the
+  file-level mapping stays honest at table grain.
+
+  `publisher` is the agency that actually published the data, which is not
+  always the agency whose work packet asked for it: six datasets registered
+  under Customs, LINZ, MfE and Health are published by Stats NZ. Attribution
+  follows the publisher, and `registered_under` records the packet.
+
+licence_basis_values:
+  dataset_page: licence stated for this dataset in the records held in this build
+  agency_record: >
+    inherited from the agency-level licence field in scripts/org_sources.py
+    ORGS and design/org_register.md. Not confirmed against this dataset's own
+    source page during the build.
+  unverified: no licence statement for this dataset is recorded anywhere in this build
+
+datasets:
+
+  # ------------------------------------------------------------------ DIA --
+  - id: dia_gmp_quarterly
+    title: "Quarterly gaming machine proceeds summary by territorial authority"
+    publisher: "Department of Internal Affairs"
+    registered_under: "DIA-1"
+    source_url: "https://www.dia.govt.nz/diawebsite.nsf/wpg_URL/Resource-material-Information-We-Provide-Summary-of-Expenditure-by-Territorial-AuthorityDistrict"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: "downloaded, staged, transformed; may be mixed with synthetic records"
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_GMP_TA, M_GMP_NATIONAL, M_GMP_PER_CAPITA]
+    upstream_files:
+      - raw/DIA/*/[Qq]uarterly*GMP*
+      - stage/GMP_QUARTERLY_SUMMARY/*
+
+  - id: dia_gmp_dashboard
+    title: "Gaming machine proceeds dashboard data (current quarter)"
+    publisher: "Department of Internal Affairs"
+    registered_under: "DIA-2"
+    source_url: "https://www.dia.govt.nz/gambling-statistics-gmp-dashboard"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: "downloaded, staged, transformed; may be mixed with synthetic records"
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_GMP_TA, M_GMP_NATIONAL]
+    upstream_files:
+      - raw/DIA/2026Q1/*
+      - stage/GMP_DASHBOARD/*
+
+  - id: dia_charities_organisations
+    title: "Charities Register - all registered and previously registered charities"
+    publisher: "Department of Internal Affairs (Charities Services / Nga Ratonga Kaupapa Atawhai)"
+    registered_under: "DIA-4"
+    source_url: "https://www.odata.charities.govt.nz/Organisations"
+    licence: "CC BY 3.0 NZ"
+    licence_url: "https://creativecommons.org/licenses/by/3.0/nz/"
+    licence_basis: agency_record
+    licence_issue: true
+    licence_note: >
+      The build's own record (scripts/org_sources.py ORGS["DIA"], and
+      design/org_register.md) says the Charities Register is CC BY 3.0 NZ, not
+      CC BY 4.0. The version difference is real and the attribution must name
+      3.0 NZ rather than be swept into the repository's blanket 4.0 statement.
+      Not re-confirmed against the register's own terms page during this pass -
+      no network access. Recommendation: keep, with the 3.0 NZ attribution
+      stated separately.
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: >
+      downloaded, staged, transformed; direct contact-detail columns dropped at
+      staging (CHARITIES_DROP_COLUMNS) and the Officers entity never downloaded
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_CHARITY, M_CHARITY_SUMMARY]
+    upstream_files:
+      - raw/DIA/undated/*Organisations*
+      - stage/CHARITIES_ORGANISATIONS/*
+
+  - id: dia_charities_annual_return
+    title: "Charities Register - annual return financials"
+    publisher: "Department of Internal Affairs (Charities Services / Nga Ratonga Kaupapa Atawhai)"
+    registered_under: "DIA-5"
+    source_url: "https://www.odata.charities.govt.nz/AnnualReturn"
+    licence: "CC BY 3.0 NZ"
+    licence_url: "https://creativecommons.org/licenses/by/3.0/nz/"
+    licence_basis: agency_record
+    licence_issue: true
+    licence_note: >
+      Same 3.0 NZ position as dia_charities_organisations. Recommendation: keep,
+      with the 3.0 NZ attribution stated separately.
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: "downloaded by OData paging, staged, transformed"
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_CHARITY_FINANCE]
+    upstream_files:
+      - raw/DIA/undated/*AnnualReturn*
+      - stage/CHARITIES_ANNUAL_RETURN/*
+
+  - id: dia_charities_classifications
+    title: "Charities Register - sector, main activity and main beneficiary classifications"
+    publisher: "Department of Internal Affairs (Charities Services / Nga Ratonga Kaupapa Atawhai)"
+    registered_under: "DIA-6, DIA-7, DIA-8"
+    source_url: "https://www.odata.charities.govt.nz/MainSector"
+    licence: "CC BY 3.0 NZ"
+    licence_url: "https://creativecommons.org/licenses/by/3.0/nz/"
+    licence_basis: agency_record
+    licence_issue: true
+    licence_note: >
+      Same 3.0 NZ position as the other Charities Register entities.
+      Recommendation: keep, with the 3.0 NZ attribution stated separately.
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: "downloaded, staged, joined to the register as dimensions"
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_CHARITY_BY_SECTOR, M_CHARITY]
+    upstream_files:
+      - raw/DIA/undated/*Main*
+      - stage/CHARITIES_DIM_SECTOR/*
+      - stage/CHARITIES_DIM_ACTIVITY/*
+      - stage/CHARITIES_DIM_BENEFICIARY/*
+
+  # ------------------------------------------------------------------ SNZ --
+  - id: snz_bulk_csv
+    title: "Stats NZ bulk CSV files for download (85 pre-packaged release files)"
+    publisher: "Stats NZ"
+    registered_under: "SNZ-1"
+    source_url: "https://www.stats.govt.nz/large-datasets/csv-files-for-download/"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: >
+      downloaded, staged, transformed, and trimmed for publication - periods from
+      1990-01, series with at least 20 observations, and only families publishing
+      fewer than 400 series (see M_EXTRACT_NOTES in the extract)
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_ECON_SERIES, M_ECON_SERIES_CATALOG, M_ECON_SERIES_LATEST]
+    upstream_files:
+      - raw/SNZ/**
+      - stage/SELECTED_PRICE_INDEXES/*
+      - stage/GROSS_DOMESTIC_PRODUCT/*
+      - stage/CONSUMERS_PRICE_INDEX_*/*
+      - stage/LABOUR_KET_STATISTICS/*
+      - stage/BUILDING_CONSENTS_ISSUED/*
+      - stage/INTERNATIONAL_MIGRATION_*/*
+
+  - id: snz_information_releases
+    title: "Stats NZ information releases index"
+    publisher: "Stats NZ"
+    registered_under: "SNZ-2"
+    source_url: "https://www.stats.govt.nz/information-releases/"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: "downloaded, staged, transformed, trimmed as for snz_bulk_csv"
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_ECON_SERIES, M_ECON_SERIES_CATALOG, M_ECON_SERIES_LATEST]
+    upstream_files:
+      - raw/SNZ/**
+      - stage/SNZ_RELEASE_INDEX/*
+
+  - id: snz_ade_population
+    title: "Estimated resident population by SA2 (Aotearoa Data Explorer, POPES_ERP_008)"
+    publisher: "Stats NZ"
+    registered_under: "SNZ-X1 (keyed source, fetched by scripts/10_keyed_download.py)"
+    source_url: "https://apis.stats.govt.nz/ade-api/rest/v2/data/dataflow/STATSNZ/POPES_ERP_008/1.0/"
+    licence: "UNVERIFIED"
+    licence_url: ""
+    licence_basis: unverified
+    licence_issue: true
+    licence_note: >
+      Obtained through the Stats NZ API Portal under a personal subscription
+      key. The build records no licence for this dataflow: the registry lists
+      SNZ-X1 only in EXCLUDED_SOURCES ("free registration and subscription key
+      required"), and no ADE terms-of-use text was captured. API portal terms
+      are a separate instrument from the CC BY licence on the published release
+      files, and may restrict redistribution of API output. Recommendation:
+      confirm the ADE API terms of use before the next release; if they do not
+      permit redistribution, drop M_ADE_POPULATION and rebuild the population
+      map from the CC BY subnational population estimates on the bulk CSV page.
+    retrieved: "2026-08-25"
+    modified: true
+    modifications: >
+      pulled as SDMX-JSON, filtered from 6.5 M observations to the
+      total-of-every-breakdown cell per area, staged and transformed
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_ADE_POPULATION]
+    upstream_files:
+      - raw/SNZ/ade/POPES_ERP_008_latest.json
+      - stage/ADE_POPULATION_SA2/*
+
+  # ------------------------------------------------------------------ CUS --
+  - id: snz_overseas_merchandise_trade
+    title: "Overseas merchandise trade (monthly release)"
+    publisher: "Stats NZ"
+    registered_under: "CUS-1 (New Zealand Customs Service work packet, section 1)"
+    source_url: "https://www.stats.govt.nz/information-releases/overseas-merchandise-trade-july-2026/"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: >
+      downloaded, staged, transformed; the by-country and by-commodity-chapter
+      facts are trimmed to periods from 2015-01
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_TRADE_MONTHLY, M_TRADE_LATEST, M_TRADE_COUNTRY, M_TRADE_HS2,
+             M_TRADE_BY_COUNTRY, M_TRADE_BY_HS2]
+    upstream_files:
+      - raw/CUS/2026-07/*
+      - stage/OMT_MONTHLY/*
+      - stage/INTERNATIONAL_TRADE/*
+
+  # ------------------------------------------------------------------ MFT --
+  - id: mft_treaties_register
+    title: "New Zealand Treaties Online register"
+    publisher: "Ministry of Foreign Affairs and Trade"
+    registered_under: "MFT-1"
+    source_url: "https://www.treaties.mfat.govt.nz/search/results"
+    licence: "UNVERIFIED"
+    licence_url: ""
+    licence_basis: unverified
+    licence_issue: true
+    licence_note: >
+      Not a published dataset - a server-rendered HTML register, scraped over
+      330 pages (3,188 of about 3,300 records). MFAT is recorded at agency level
+      as CC BY 4.0, but no licence or terms-of-use statement from
+      treaties.mfat.govt.nz is captured anywhere in this build, and a website's
+      reuse terms are a separate question from an agency's open-data policy.
+      Recommendation: keep with special attribution (cite MFAT and New Zealand
+      Treaties Online explicitly as the register, not as a CC BY dataset) and
+      confirm the site's terms of use before the next release.
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: "scraped, staged, transformed; decade aggregation computed here"
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_TREATY, M_TREATY_BY_DECADE]
+    upstream_files:
+      - stage/TREATIES_REGISTER/*
+
+  # ------------------------------------------------------------------ LNZ --
+  - id: linz_gazetteer
+    title: "New Zealand Gazetteer of place names"
+    publisher: "Land Information New Zealand / Toitu Te Whenua (New Zealand Geographic Board Nga Pou Taunaha o Aotearoa)"
+    registered_under: "LNZ-1"
+    source_url: "https://gazetteer.linz.govt.nz/gaz.csv"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    licence_issue: true
+    licence_note: >
+      The LINZ packet's CC BY claim is about the LINZ Data Service
+      (data.linz.govt.nz); the Gazetteer is served from a different host and no
+      licence statement for gazetteer.linz.govt.nz is recorded in this build.
+      The packet also mandates a specific attribution string for LINZ material,
+      which is reproduced in ATTRIBUTION.md. Recommendation: keep with the
+      mandated LINZ attribution, and confirm the Gazetteer's own terms before
+      the next release.
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: "downloaded, staged, transformed; H3-aggregated for the map layer"
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_PLACE_NAME, M_PLACE_SUMMARY, M_PLACE_FEATURE_TYPE, M_PLACE_REGION,
+             M_PLACE_BY_REGION, M_PLACE_H3]
+    upstream_files:
+      - raw/LNZ/undated/gaz*
+      - stage/GAZETTEER_PLACE_NAMES/*
+
+  - id: snz_property_transfers
+    title: "Property transfer statistics"
+    publisher: "Stats NZ"
+    registered_under: "LNZ-2 (Land Information New Zealand work packet, section 5)"
+    source_url: "https://www.stats.govt.nz/large-datasets/csv-files-for-download/"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: >
+      downloaded, staged, transformed; the fine-grained by-tax-residency grid is
+      not published here, only the headline quarterly series
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_PROPERTY_TRANSFER]
+    upstream_files:
+      - raw/LNZ/2023Q4/*
+      - raw/LNZ/2024Q2/*
+      - stage/PROPERTY_TRANSFERS/*
+      - stage/PROPERTY_TRANSFER_STATISTICS/*
+
+  - id: linz_data_service_keyed
+    title: "LINZ Data Service - NZ Primary Parcels, NZ Property Titles, NZ Addresses, NZ Suburbs and Localities"
+    publisher: "Land Information New Zealand / Toitu Te Whenua"
+    registered_under: "LNZ-X1 (keyed source, fetched by scripts/10_keyed_download.py)"
+    source_url: "https://data.linz.govt.nz/"
+    licence: "UNVERIFIED"
+    licence_url: ""
+    licence_basis: unverified
+    licence_issue: true
+    licence_note: >
+      Fetched by WFS from the Koordinates-hosted LINZ Data Service using a
+      personal API key, clipped to the Wellington region. The build records this
+      source only in EXCLUDED_SOURCES with the reason "Koordinates API key
+      required", and design/packet_assumptions.md marks the packet's claim that
+      "nearly everything is CC-BY" as UNTESTABLE. No per-layer licence was
+      captured at download, and the packet itself warns that some LINZ layers
+      require licence acceptance before access. Four layers are nevertheless
+      published here (31,238 parcels, 51,948 addresses, 6,563 suburbs, and a
+      title summary). Recommendation: keep only after confirming each layer's
+      licence on its LDS page and recording it per layer here; if any layer is
+      not open-licensed for redistribution, drop that layer's tables from the
+      extract. Note also that M_PIPELINE_SOURCE in the app still describes this
+      source as excluded, which is now wrong.
+    retrieved: "2026-08-25"
+    modified: true
+    modifications: >
+      fetched by WFS with a Wellington-region bounding box, staged, transformed;
+      parcel rings simplified, addresses H3-aggregated, and the detail tables
+      further clipped to the Wellington City inner extent for publication
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_LINZ_PARCEL, M_LINZ_ADDRESS, M_LINZ_ADDRESS_H3, M_LINZ_SUBURB,
+             M_LINZ_TITLE_SUMMARY]
+    upstream_files:
+      - stage/LINZ_PARCELS/*
+      - stage/LINZ_TITLES/*
+      - stage/LINZ_ADDRESSES/*
+      - stage/LINZ_SUBURBS/*
+
+  # ------------------------------------------------------------------ MFE --
+  - id: mfe_ghg_inventory
+    title: "New Zealand Greenhouse Gas Inventory 1990-2024 - time series and summary emissions data"
+    publisher: "Ministry for the Environment / Manatu Mo Te Taiao"
+    registered_under: "MFE-1, MFE-2"
+    source_url: "https://environment.govt.nz/assets/publications/GhG-Inventory/GHG-Inventory-2026/GHG-Inventory-2026-Time-series-emissions-data-1990-to-2024.xlsx"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: "downloaded, staged, transformed; gross and net totals separated by worksheet position"
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_GHG_INVENTORY, M_GHG_NATIONAL, M_GHG_SUBMISSION, M_GHG_CROSS_SOURCE]
+    upstream_files:
+      - raw/MFE/1990/*
+      - stage/GHG_TIME_SERIES/*
+      - stage/GHG_SUMMARY/*
+
+  - id: mfe_ghg_prior_submissions
+    title: "Previous greenhouse gas inventory submissions (2003 onward)"
+    publisher: "Ministry for the Environment / Manatu Mo Te Taiao"
+    registered_under: "MFE-3"
+    source_url: "https://environment.govt.nz/facts-and-science/climate-change/new-zealands-greenhouse-gas-inventory/previous-greenhouse-gas-inventories/"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: >
+      downloaded, staged, transformed; the published extract keeps only the most
+      recent submission, older editions of the same years stay in the working tree
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_GHG_INVENTORY, M_GHG_SUBMISSION]
+    upstream_files:
+      - raw/MFE/*/
+      - stage/GHG_PRIOR_SUBMISSIONS/*
+
+  - id: snz_ghg_by_region
+    title: "Greenhouse gas emissions by region, industry and household"
+    publisher: "Stats NZ"
+    registered_under: "MFE-4 (Ministry for the Environment work packet, section 3)"
+    source_url: "https://www.stats.govt.nz/information-releases/greenhouse-gas-emissions-by-region-industry-and-household-year-ended-2025/"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: >
+      downloaded, staged, transformed; charted against the MfE inventory as a
+      second series on a different accounting basis, never averaged with it
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_GHG_REGIONAL, M_GHG_CROSS_SOURCE]
+    upstream_files:
+      - raw/MFE/2025/*
+      - stage/GHG_BY_REGION/*
+      - stage/GREENHOUSE_GAS_EMISSIONS_*/*
+
+  - id: snz_env_economic_accounts
+    title: "Environmental-economic accounts"
+    publisher: "Stats NZ"
+    registered_under: "MFE-5 (Ministry for the Environment work packet, section 3)"
+    source_url: "https://www.stats.govt.nz/large-datasets/csv-files-for-download/"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: "downloaded, staged, transformed"
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_ENV_ACCOUNT]
+    upstream_files:
+      - raw/MFE/1995/*
+      - raw/MFE/1996/*
+      - raw/MFE/1999/*
+      - stage/ENV_ECONOMIC_ACCOUNTS/*
+      - stage/ENVIRONMENTAL_TAX_ACCOUNT/*
+      - stage/ENVIRONMENTAL_PROTECTION_EXPENDITURE_ACCOUNT/*
+      - stage/FISH_MONETARY_STOCK_ACCOUNT/*
+      - stage/RENEWABLE_ENERGY_STOCK_ACCOUNT/*
+      - stage/WATER_PHYSICAL_STOCK_ACCOUNT_LY_CSV/*
+
+  - id: mfe_data_service_keyed
+    title: "MfE Data Service - modelled river water quality, gazetted airsheds, annual air quality trends"
+    publisher: "Ministry for the Environment / Manatu Mo Te Taiao"
+    registered_under: "MFE-X1 (keyed source, fetched by scripts/10_keyed_download.py)"
+    source_url: "https://data.mfe.govt.nz/"
+    licence: "UNVERIFIED"
+    licence_url: ""
+    licence_basis: unverified
+    licence_issue: true
+    licence_note: >
+      Fetched by WFS from the Koordinates-hosted MfE Data Service using a
+      personal API key. As with the LINZ Data Service, this source is recorded
+      only in EXCLUDED_SOURCES ("Koordinates API key required") and
+      design/packet_assumptions.md marks MFE-A1 UNTESTABLE; no per-layer licence
+      was captured at download. Seven layers are nevertheless published here.
+      Recommendation: keep only after confirming each layer's licence on its
+      data.mfe.govt.nz page and recording it per layer here. Note also that
+      M_PIPELINE_SOURCE in the app still describes this source as excluded.
+    retrieved: "2026-08-25"
+    modified: true
+    modifications: >
+      fetched by WFS, river layers clipped to the Wellington region at download,
+      geometry dropped, staged and transformed
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_MFE_RIVER_QUALITY, M_MFE_AIR_TREND, M_MFE_AIRSHED]
+    upstream_files:
+      - stage/MFE_RIVER_*/*
+      - stage/MFE_AIRSHEDS/*
+      - stage/MFE_AIR_TRENDS/*
+
+  # ------------------------------------------------------------------ MOH --
+  - id: moh_health_survey
+    title: "New Zealand Health Survey regional data release - adult and child statistics, crude and age-standardised"
+    publisher: "Ministry of Health / Manatu Hauora"
+    registered_under: "MOH-1, MOH-2, MOH-3, MOH-4"
+    source_url: "https://www.health.govt.nz/publications/regional-data-release-new-zealand-health-survey"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: >
+      downloaded, staged, transformed, and trimmed from 5.2 M rows to 473 k for
+      publication - national estimates with all breakdowns, plus regional council
+      totals for four total-response ethnic groups. Estimates are survey
+      estimates and are published here with their confidence intervals.
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_HEALTH_INDICATOR, M_HEALTH_LATEST]
+    upstream_files:
+      - raw/MOH/2026/*
+      - stage/NZHS_ADULT/*
+      - stage/NZHS_ADULT_AS/*
+      - stage/NZHS_CHILD/*
+      - stage/NZHS_CHILD_AS/*
+
+  - id: moh_health_survey_indicator_guide
+    title: "New Zealand Health Survey indicator reference guide 2024/25"
+    publisher: "Ministry of Health / Manatu Hauora"
+    registered_under: "MOH-5"
+    source_url: "https://www.health.govt.nz/system/files/2026-04/indicator-reference-guide-2024-25.xlsx"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: "downloaded, staged, transformed into the indicator dimension"
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_HEALTH_TOPIC]
+    upstream_files:
+      - raw/MOH/2025/*
+      - stage/NZHS_INDICATOR_GUIDE/*
+
+  - id: snz_period_life_tables
+    title: "Period life tables, including health districts and NZDep"
+    publisher: "Stats NZ"
+    registered_under: "MOH-7 (Ministry of Health work packet, section 2)"
+    source_url: "https://www.stats.govt.nz/large-datasets/csv-files-for-download/"
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    modified: true
+    modifications: >
+      downloaded, staged, transformed; used as the life-expectancy proxy in
+      place of the MoH Mortality Collection, which is not served to scripted
+      clients
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_LIFE_EXPECTANCY]
+    upstream_files:
+      - raw/MOH/2022/*
+      - raw/MOH/2024/*
+      - stage/LIFE_TABLES/*
+      - stage/HEALTH_DISTRICTS_PERIOD_LIFE_TABLES/*
+      - stage/NZDEP_PERIOD_LIFE_TABLES/*
+      - stage/SUBNATIONAL_PERIOD_LIFE_TABLES/*
+      - stage/NEW_ZEALAND_PERIOD_LIFE_TABLES/*
+
+  # -------------------------------------------------------------- derived --
+  - id: pipeline_metadata
+    title: "Pipeline provenance registers (source register, download manifest, gaps, aliases, catalog, skipped tables, packet URL audit, excluded sources, validation results, extract notes)"
+    publisher: "Celnic Consulting (generated)"
+    licence: "MIT, as code output"
+    licence_url: "https://opensource.org/licenses/MIT"
+    modified: false
+    note: >
+      Metadata about this build, not agency data. It quotes source titles, URLs
+      and file names from the agencies' own pages, which are facts about where
+      the files came from. M_PIPELINE_SOURCE currently lists only the 32
+      unkeyed sources, and M_EXCLUDED_SOURCES still describes the three keyed
+      sources as excluded even though their data is published here - see the
+      licence notes on linz_data_service_keyed, mfe_data_service_keyed and
+      snz_ade_population.
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [M_ORG_REGISTER, M_PLATFORM_SUMMARY, M_VALIDATION_RESULTS,
+             M_PIPELINE_SOURCE, M_PIPELINE_DOWNLOAD, M_PIPELINE_GAPS,
+             M_PIPELINE_ALIASES, M_PIPELINE_CATALOG, M_PIPELINE_SKIPPED,
+             M_PACKET_URL_AUDIT, M_EXCLUDED_SOURCES, M_EXTRACT_NOTES]
+
+  - id: build_writeup
+    title: "Mid-range org platform build write-up"
+    publisher: "Celnic Consulting"
+    licence: "MIT, as documentation in this repository"
+    licence_url: "https://opensource.org/licenses/MIT"
+    modified: false
+    note: >
+      Prose describing this build, served by the app's Build Notes tab. Contains
+      no agency data.
+    files:
+      - reference/mid_range_org__readme.md
+
+  - id: synthetic
+    title: "Synthetic demonstration data"
+    publisher: "Celnic Consulting (generated)"
+    licence: "CC0 / demonstration only"
+    modified: false
+    note: >
+      Generated to fill gaps per the work packet; carries no statistical
+      meaning. SYN_VENUE_GMP models venue-grain gaming machine proceeds, a grain
+      the Department of Internal Affairs suppresses by design. Every row carries
+      IS_SYNTHETIC = TRUE, no venue names are generated, and every territorial
+      authority in every quarter reconciles to the figure DIA published for it.
+      Seed 42.
+    files:
+      - data/mid_range_org_public.duckdb
+    tables: [SYN_VENUE_GMP]
+
+# ====================UPSTREAM_ONLY====================
+# Registered sources that were downloaded or scraped into the working tree but
+# whose data reaches no table in this repository. Listed so the inventory is
+# complete and so nobody assumes the repository carries them.
+upstream_only:
+  - id: dia_gambling_hub
+    registered_under: "DIA-3"
+    publisher: "Department of Internal Affairs"
+    source_url: "https://www.dia.govt.nz/gambling-statistics"
+    licence: "CC BY 4.0"
+    licence_basis: agency_record
+    note: "Crawl hub. No file was downloaded from it."
+
+  - id: snz_international_travel
+    registered_under: "CUS-2"
+    publisher: "Stats NZ"
+    source_url: "https://www.stats.govt.nz/information-releases/international-travel-june-2026/"
+    licence: "CC BY 4.0"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    note: >
+      Downloaded to raw/CUS/2026-06/ and staged, but never joined to trade -
+      its month basis is processing month, not trade month. No table in this
+      repository reads it.
+
+  - id: customs_annual_reports
+    registered_under: "CUS-3"
+    publisher: "New Zealand Customs Service / Te Mana Arai o Aotearoa"
+    source_url: "https://www.customs.govt.nz/about-us/corporate-publications"
+    licence: "UNVERIFIED"
+    licence_basis: unverified
+    licence_issue: true
+    licence_note: >
+      Twelve annual report PDFs, 2019-2025. Corporate publications carry Crown
+      copyright and their reuse terms are stated inside each report, which this
+      build did not capture. Immaterial to this repository - the revenue and
+      seizure figures proved to be prose rather than extractable tables, so
+      nothing from them is published here. Recommendation: no action while
+      nothing is redistributed; confirm the reports' own copyright statements
+      before publishing any figure from them.
+    retrieved: "2026-08-24"
+
+  - id: mft_fta_portfolio
+    registered_under: "MFT-2"
+    publisher: "Ministry of Foreign Affairs and Trade"
+    source_url: "https://www.mfat.govt.nz/en/trade/free-trade-agreements"
+    licence: "UNVERIFIED"
+    licence_basis: unverified
+    licence_issue: true
+    licence_note: >
+      Seven pages scraped into stage/FTA_PORTFOLIO. No licence statement for
+      mfat.govt.nz is recorded in this build. Nothing from it reaches this
+      repository. Recommendation: confirm the site's terms of use before
+      publishing it.
+    retrieved: "2026-08-24"
+
+  - id: mft_aid_allocations
+    registered_under: "MFT-3"
+    publisher: "Ministry of Foreign Affairs and Trade"
+    source_url: "https://www.mfat.govt.nz/en/aid-and-development/our-approach-to-aid/where-our-funding-goes"
+    licence: "CC BY 4.0"
+    licence_basis: agency_record
+    retrieved: "2026-08-24"
+    note: "One PDF, extracted to a text stage. Prose, not tables; nothing published here."
+
+  - id: linz_oio_decisions
+    registered_under: "LNZ-3"
+    publisher: "Land Information New Zealand / Toitu Te Whenua"
+    source_url: "https://www.linz.govt.nz/our-work/overseas-investment-regulation/decisions"
+    licence: "UNVERIFIED"
+    licence_basis: unverified
+    licence_issue: true
+    licence_note: >
+      64 decision links scraped into stage/OIO_DECISIONS. Overseas investment
+      decision summaries concern named applicants and specific transactions;
+      neither their licence nor their republication terms are recorded in this
+      build. Nothing from them reaches this repository. Recommendation: leave
+      unpublished until the terms are confirmed.
+    retrieved: "2026-08-24"
+
+  - id: moh_health_survey_landing_page
+    registered_under: "MOH-6"
+    publisher: "Ministry of Health / Manatu Hauora"
+    source_url: "https://www.health.govt.nz/publications/regional-data-release-new-zealand-health-survey"
+    licence: "CC BY 4.0"
+    licence_basis: agency_record
+    note: "Crawled so a new release year is picked up. No distinct file."
+
+  - id: healthnz_data
+    registered_under: "MOH-8"
+    publisher: "Health New Zealand / Te Whatu Ora"
+    source_url: "https://www.healthnz.govt.nz/about-us/health-data"
+    licence: "UNVERIFIED"
+    licence_basis: unverified
+    licence_issue: true
+    licence_note: >
+      Health NZ is a different legal entity from the Ministry of Health, so the
+      Ministry's agency-level CC BY 4.0 record does not cover it, and
+      design/packet_assumptions.md records that its data pages are Disallowed in
+      robots.txt. No file was downloaded and nothing reaches this repository.
+      Recommendation: leave unpublished.

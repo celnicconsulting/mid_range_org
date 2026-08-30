@@ -859,6 +859,29 @@ def render_header():
     )
 
 
+def render_attribution():
+    """CC BY attribution, shown once at the foot of the page.
+
+    This does not replace the hazard-striped banner above: that one states what
+    the application is and is not, and it stays at the top where a reader meets
+    it before any figure. This one carries the licence obligation — attribution
+    to the publishers and a statement that the data has been modified — and sits
+    at the bottom, collapsed, because a licence notice is a reference the reader
+    goes to rather than a warning the reader must be stopped by.
+
+    The link points at the repository copy rather than a bundled file, so the
+    full manifest travels with the deployed app on Streamlit Community Cloud,
+    where only the app directory and the extract are on disk.
+    """
+    with st.expander("Data sources & attribution"):
+        st.markdown(
+            "Built on open data used under **CC BY 4.0** — modified and "
+            "partly synthetic; demonstration of method, not published "
+            "statistics. Full provenance: "
+            "[ATTRIBUTION.md](https://github.com/celnicconsulting/mid_range_org/blob/main/ATTRIBUTION.md)."
+        )
+
+
 # ====================SIDEBAR====================
 def render_sidebar(df_db_schema, fingerprint):
     st.sidebar.title("🏛️ Mid-Range Org")
@@ -1897,6 +1920,8 @@ def main():
                 render(df_db_schema, fingerprint, orgs)
             except Exception as exc:  # noqa: BLE001
                 st.error(f"This tab could not render: {exc}")
+
+    render_attribution()
 
 
 if __name__ == "__main__":
