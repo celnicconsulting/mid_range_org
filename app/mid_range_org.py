@@ -875,9 +875,15 @@ def render_attribution():
     """
     with st.expander("Data sources & attribution"):
         st.markdown(
-            "Built on open data used under **CC BY 4.0** — modified and "
-            "partly synthetic; demonstration of method, not published "
-            "statistics. Full provenance: "
+            "Built on open data used under **CC BY 4.0** and **CC BY 3.0 NZ** "
+            "(the Charities Register, the DIA gaming machine proceeds summary, "
+            "and the New Zealand Treaties Online register) — every licence "
+            "verified at source, 30 August 2026. This work is based on/includes "
+            "Toitū Te Whenua Land Information New Zealand data which are "
+            "licensed by Toitū Te Whenua Land Information New Zealand for "
+            "re-use under the Creative Commons Attribution 4.0 International "
+            "licence. Data is modified and partly synthetic; demonstration of "
+            "method, not published statistics. Full provenance: "
             "[ATTRIBUTION.md](https://github.com/celnicconsulting/mid_range_org/blob/main/ATTRIBUTION.md)."
         )
 

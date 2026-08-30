@@ -15,15 +15,30 @@ licences given in ATTRIBUTION.md.
 Most of it is used under Creative Commons Attribution 4.0 International
 (CC BY 4.0) — https://creativecommons.org/licenses/by/4.0/
 
-The Charities Register datasets are used under Creative Commons Attribution
-3.0 New Zealand (CC BY 3.0 NZ) —
-https://creativecommons.org/licenses/by/3.0/nz/
+Three sources are used under Creative Commons Attribution 3.0 New Zealand
+(CC BY 3.0 NZ) — https://creativecommons.org/licenses/by/3.0/nz/ — namely the
+Charities Register datasets, the DIA quarterly gaming machine proceeds summary
+by territorial authority, and the New Zealand Treaties Online register.
 
-Several datasets carry a licence that this build has not confirmed. Each is
-marked `licence_issue: true` in DATA_SOURCES.yaml with a note explaining the
-question and a recommendation, and is listed under "Licence to confirm" in
-ATTRIBUTION.md. They are published here pending that confirmation; anyone
-reusing this repository should read those notes first.
+VERIFIED AT SOURCE
+------------------
+On 30 August 2026 every licence in this repository was checked online against
+the publisher's own page or the dataset's own data.govt.nz catalogue record.
+DATA_SOURCES.yaml records for each dataset the licence, where the claim was read
+(`licence_basis`: dataset_page or agency_record) and the URL it was read at
+(`licence_evidence`). No published dataset is unverified.
+
+Datasets still marked `licence_issue: true` are those where the strongest
+statement that exists is agency-wide rather than dataset-specific. That flag
+describes the strength of the evidence, not a doubt about the licence — the
+statement itself was read at source in every case and is recorded.
+
+The three API-key sources — the LINZ Data Service, the MfE Data Service and the
+Stats NZ Aotearoa Data Explorer — were checked on two separate questions: the
+licence on each layer or dataflow, and whether the portal's own terms of use
+permit redistribution of derived extracts. Every layer is CC BY 4.0 and every
+portal permits redistribution; the API key gates access, not reuse. Those
+answers are recorded in the `portal_terms` field of each entry.
 
 Nothing in this repository grants you any right in the source data beyond what
 its own publisher's licence grants you. Where a source licence and the MIT

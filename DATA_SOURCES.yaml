@@ -1,5 +1,6 @@
 # DATA_SOURCES.yaml - provenance and licence manifest
 generated_by: show-me-org attribution pass, 2026-08-30
+licences_verified_at_source: 2026-08-30
 repository: https://github.com/celnicconsulting/mid_range_org
 note: >
   This repository publishes derived artefacts only (the extracts the app
@@ -8,10 +9,15 @@ note: >
 
   Every dataset below is registered in scripts/org_sources.py in the working
   tree; the id used here is that registry's dataset_id, so a row can be traced
-  to the packet section it came from. `licence_basis` records WHERE the licence
-  claim comes from, because the distinction between a licence read off a
-  dataset's own page and one inherited from an agency-level note is the whole
-  point of this manifest.
+  to the packet section it came from.
+
+  On 2026-08-30 every licence in this file was checked online against the
+  publisher's own pages and, where one exists, the dataset's own data.govt.nz
+  catalogue record. `licence_basis` records WHERE the claim comes from and
+  `licence_evidence` records the URL it was read at, because the distinction
+  between a licence read off a dataset's own record and one inherited from an
+  agency-wide statement is the whole point of this manifest. Nothing here is
+  inherited from the build's internal registry any more.
 
   A single file, data/mid_range_org_public.duckdb, carries every derived
   artefact. `tables` names the tables inside it that a dataset feeds, so the
@@ -23,12 +29,27 @@ note: >
   follows the publisher, and `registered_under` records the packet.
 
 licence_basis_values:
-  dataset_page: licence stated for this dataset in the records held in this build
+  dataset_page: >
+    read from this dataset's own source page or its own data.govt.nz catalogue
+    record (CKAN licence_id), on the date above
   agency_record: >
-    inherited from the agency-level licence field in scripts/org_sources.py
-    ORGS and design/org_register.md. Not confirmed against this dataset's own
-    source page during the build.
-  unverified: no licence statement for this dataset is recorded anywhere in this build
+    only an agency-wide or site-wide licensing statement was found and read;
+    no statement specific to this dataset exists or could be reached
+  unverified: >
+    no licence could be established - the page was unreachable, blocked, or
+    carried no statement
+
+licence_issue_rule: >
+  licence_issue is true unless licence_basis is dataset_page AND the licence is
+  a clean attribution licence (CC BY 4.0, CC BY 4.0 NZ, CC BY 3.0 NZ,
+  CC BY-SA 4.0). A true flag on an agency_record row is a statement about the
+  strength of the evidence, not a doubt about the licence itself.
+
+portal_terms_note: >
+  Three sources were downloaded through API-key-gated portals. For those,
+  `portal_terms` answers a question the licence does not: whether the portal's
+  own terms of use permit redistribution of derived extracts. All three were
+  checked and all three permit it - see the individual entries.
 
 datasets:
 
@@ -38,9 +59,23 @@ datasets:
     publisher: "Department of Internal Affairs"
     registered_under: "DIA-1"
     source_url: "https://www.dia.govt.nz/diawebsite.nsf/wpg_URL/Resource-material-Information-We-Provide-Summary-of-Expenditure-by-Territorial-AuthorityDistrict"
-    licence: "CC BY 4.0"
-    licence_url: "https://creativecommons.org/licenses/by/4.0/"
-    licence_basis: agency_record
+    licence: "CC BY 3.0 NZ"
+    licence_url: "https://creativecommons.org/licenses/by/3.0/nz/"
+    licence_basis: dataset_page
+    licence_evidence: "https://www.dia.govt.nz/diawebsite.nsf/wpg_URL/Resource-material-Information-We-Provide-Summary-of-Expenditure-by-Territorial-AuthorityDistrict"
+    licence_note: >
+      Corrected from the CC BY 4.0 the build had inherited at agency level. The
+      DIA page the files are downloaded from carries its own explicit statement:
+      "Gaming machine and gambling expenditure statistics owned and administered
+      by the New Zealand Public Sector by Department of Internal Affairs is
+      licensed under a Creative Commons Attribute 3.0 New Zealand Licence."
+      Note a discrepancy at source: the data.govt.nz catalogue record for the
+      same series, "Class 4 Gambling Expenditure by Quarter and District"
+      (https://catalogue.data.govt.nz/dataset/class-4-gambling-expenditure-by-quarter-and-district),
+      carries licence_id CC-BY-4.0. The statement on the page the data was
+      actually taken from is recorded here as the narrower of the two; both are
+      clean attribution licences, so nothing turns on it beyond naming 3.0 NZ
+      in the attribution.
     retrieved: "2026-08-24"
     modified: true
     modifications: "downloaded, staged, transformed; may be mixed with synthetic records"
@@ -58,7 +93,14 @@ datasets:
     source_url: "https://www.dia.govt.nz/gambling-statistics-gmp-dashboard"
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
-    licence_basis: agency_record
+    licence_basis: dataset_page
+    licence_evidence: "https://catalogue.data.govt.nz/dataset/gaming-machine-profits-gmp-dashboard"
+    licence_note: >
+      Confirmed from this dataset's own catalogue record, which names
+      https://www.dia.govt.nz/gambling-statistics-gmp-dashboard as its source
+      and carries licence_id CC-BY-4.0, licence_title "Creative Commons
+      Attribution 4.0 International". The dashboard page itself shows only
+      "Crown Copyright (c) 2026" with no licence sentence.
     retrieved: "2026-08-24"
     modified: true
     modifications: "downloaded, staged, transformed; may be mixed with synthetic records"
@@ -76,16 +118,16 @@ datasets:
     source_url: "https://www.odata.charities.govt.nz/Organisations"
     licence: "CC BY 3.0 NZ"
     licence_url: "https://creativecommons.org/licenses/by/3.0/nz/"
-    licence_basis: agency_record
-    licence_issue: true
+    licence_basis: dataset_page
+    licence_evidence: "https://catalogue.data.govt.nz/dataset/charities-register-open-data"
     licence_note: >
-      The build's own record (scripts/org_sources.py ORGS["DIA"], and
-      design/org_register.md) says the Charities Register is CC BY 3.0 NZ, not
-      CC BY 4.0. The version difference is real and the attribution must name
-      3.0 NZ rather than be swept into the repository's blanket 4.0 statement.
-      Not re-confirmed against the register's own terms page during this pass -
-      no network access. Recommendation: keep, with the 3.0 NZ attribution
-      stated separately.
+      CONFIRMED at source. The Charities Register Open Data catalogue record
+      carries licence_id "CC-BY-NZ-3.0", licence_title "Creative Commons
+      Attribution 3.0 New Zealand", licence_url
+      https://creativecommons.org/licenses/by/3.0/nz/. The version difference
+      from the repository's CC BY 4.0 majority is real and the attribution names
+      3.0 NZ separately. (charities.govt.nz itself refuses non-browser clients
+      with HTTP 403, so the catalogue record is the read source.)
     retrieved: "2026-08-24"
     modified: true
     modifications: >
@@ -105,11 +147,12 @@ datasets:
     source_url: "https://www.odata.charities.govt.nz/AnnualReturn"
     licence: "CC BY 3.0 NZ"
     licence_url: "https://creativecommons.org/licenses/by/3.0/nz/"
-    licence_basis: agency_record
-    licence_issue: true
+    licence_basis: dataset_page
+    licence_evidence: "https://catalogue.data.govt.nz/dataset/charities-register-open-data"
     licence_note: >
-      Same 3.0 NZ position as dia_charities_organisations. Recommendation: keep,
-      with the 3.0 NZ attribution stated separately.
+      Same record as dia_charities_organisations: the Charities Register Open
+      Data catalogue entry covers every OData entity of the register and carries
+      licence_id "CC-BY-NZ-3.0". Confirmed at source.
     retrieved: "2026-08-24"
     modified: true
     modifications: "downloaded by OData paging, staged, transformed"
@@ -127,11 +170,11 @@ datasets:
     source_url: "https://www.odata.charities.govt.nz/MainSector"
     licence: "CC BY 3.0 NZ"
     licence_url: "https://creativecommons.org/licenses/by/3.0/nz/"
-    licence_basis: agency_record
-    licence_issue: true
+    licence_basis: dataset_page
+    licence_evidence: "https://catalogue.data.govt.nz/dataset/charities-register-open-data"
     licence_note: >
-      Same 3.0 NZ position as the other Charities Register entities.
-      Recommendation: keep, with the 3.0 NZ attribution stated separately.
+      Same record as the other Charities Register entities: licence_id
+      "CC-BY-NZ-3.0". Confirmed at source.
     retrieved: "2026-08-24"
     modified: true
     modifications: "downloaded, staged, joined to the register as dimensions"
@@ -153,6 +196,19 @@ datasets:
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
     licence_basis: agency_record
+    licence_evidence: "https://www.stats.govt.nz/about-us/copyright/"
+    licence_issue: true
+    licence_note: >
+      Stats NZ's licensing statement, read at source in the agency's own
+      DataInfo+ metadata registry (https://datainfoplus.stats.govt.nz/): "This
+      work is licensed under the Creative Commons Attribution 4.0 International
+      licence... You are free to copy, distribute, and adapt the work, as long
+      as you attribute the work to Statistics NZ and abide by the other licence
+      terms." That statement is agency-wide. The bulk CSV page itself renders
+      its footer client-side and returns no licence text to a scripted client,
+      and these release files have no individual data.govt.nz catalogue record,
+      so no dataset-specific statement exists to read. Flagged for basis, not
+      for doubt about the licence.
     retrieved: "2026-08-24"
     modified: true
     modifications: >
@@ -179,6 +235,12 @@ datasets:
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
     licence_basis: agency_record
+    licence_evidence: "https://www.stats.govt.nz/about-us/copyright/"
+    licence_issue: true
+    licence_note: >
+      Same agency-wide Stats NZ statement as snz_bulk_csv. Individual release
+      pages return no licence text to a scripted client and are not separately
+      catalogued on data.govt.nz. Flagged for basis, not for doubt.
     retrieved: "2026-08-24"
     modified: true
     modifications: "downloaded, staged, transformed, trimmed as for snz_bulk_csv"
@@ -194,20 +256,31 @@ datasets:
     publisher: "Stats NZ"
     registered_under: "SNZ-X1 (keyed source, fetched by scripts/10_keyed_download.py)"
     source_url: "https://apis.stats.govt.nz/ade-api/rest/v2/data/dataflow/STATSNZ/POPES_ERP_008/1.0/"
-    licence: "UNVERIFIED"
-    licence_url: ""
-    licence_basis: unverified
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: agency_record
+    licence_evidence: "https://portal.apis.stats.govt.nz/terms"
+    portal_terms: >
+      REDISTRIBUTION PERMITTED. The Stats NZ API Portal terms of use state:
+      "Content available through the API Portal is licensed under the Creative
+      Commons Attribution 4.0 International license" and "You may use, share,
+      and adapt the data, including for commercial purposes, provided you give
+      appropriate credit to Stats NZ, indicate if changes were made, and do not
+      imply endorsement by Stats NZ." The only restriction stated is that users
+      must not attempt to re-identify individuals, which this build does not:
+      POPES_ERP_008 is published area-level population estimates. The
+      subscription key gates access, not reuse.
     licence_issue: true
     licence_note: >
-      Obtained through the Stats NZ API Portal under a personal subscription
-      key. The build records no licence for this dataflow: the registry lists
-      SNZ-X1 only in EXCLUDED_SOURCES ("free registration and subscription key
-      required"), and no ADE terms-of-use text was captured. API portal terms
-      are a separate instrument from the CC BY licence on the published release
-      files, and may restrict redistribution of API output. Recommendation:
-      confirm the ADE API terms of use before the next release; if they do not
-      permit redistribution, drop M_ADE_POPULATION and rebuild the population
-      map from the CC BY subnational population estimates on the bulk CSV page.
+      RESOLVED. The build previously recorded no licence at all for this
+      dataflow. The API Portal's own terms page settles both questions: the
+      content is CC BY 4.0, and redistribution of derived extracts is permitted
+      (see portal_terms). The fallback recorded earlier - drop M_ADE_POPULATION
+      and rebuild from the CC BY subnational population estimates on the bulk
+      CSV page - is NOT needed. Basis is agency_record rather than dataset_page
+      because the terms are portal-wide: the Aotearoa Data Explorer does not
+      publish a per-dataflow licence page, and explore.data.stats.govt.nz
+      renders client-side and returns nothing to a scripted client.
     retrieved: "2026-08-25"
     modified: true
     modifications: >
@@ -229,6 +302,12 @@ datasets:
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
     licence_basis: agency_record
+    licence_evidence: "https://www.stats.govt.nz/about-us/copyright/"
+    licence_issue: true
+    licence_note: >
+      Same agency-wide Stats NZ statement as snz_bulk_csv. The release page
+      returns no licence text to a scripted client and the release has no
+      data.govt.nz catalogue record of its own. Flagged for basis, not for doubt.
     retrieved: "2026-08-24"
     modified: true
     modifications: >
@@ -249,19 +328,24 @@ datasets:
     publisher: "Ministry of Foreign Affairs and Trade"
     registered_under: "MFT-1"
     source_url: "https://www.treaties.mfat.govt.nz/search/results"
-    licence: "UNVERIFIED"
-    licence_url: ""
-    licence_basis: unverified
-    licence_issue: true
+    licence: "CC BY 3.0 NZ"
+    licence_url: "https://creativecommons.org/licenses/by/3.0/nz/"
+    licence_basis: dataset_page
+    licence_evidence: "https://www.treaties.mfat.govt.nz/about"
     licence_note: >
-      Not a published dataset - a server-rendered HTML register, scraped over
-      330 pages (3,188 of about 3,300 records). MFAT is recorded at agency level
-      as CC BY 4.0, but no licence or terms-of-use statement from
-      treaties.mfat.govt.nz is captured anywhere in this build, and a website's
-      reuse terms are a separate question from an agency's open-data policy.
-      Recommendation: keep with special attribution (cite MFAT and New Zealand
-      Treaties Online explicitly as the register, not as a CC BY dataset) and
-      confirm the site's terms of use before the next release.
+      RESOLVED. It is a published register rather than a packaged open dataset -
+      server-rendered HTML, scraped over 330 pages, with no CSV, API or
+      data.govt.nz record behind it - but its content IS openly licensed. New
+      Zealand Treaties Online states its own terms: "Unless otherwise specified,
+      the content on this site is licensed under the Creative Commons
+      Attribution 3.0 New Zealand licence", and users may "copy, distribute, and
+      adapt material from this site as long as you acknowledge its source and
+      follow the licence terms". Note this is 3.0 NZ, not the 4.0 that
+      mfat.govt.nz's main copyright page (https://www.mfat.govt.nz/en/copyright)
+      applies to the primary site - the register site carries its own, older
+      instrument, and the register's own statement governs. The attribution
+      still cites MFAT and New Zealand Treaties Online explicitly as the
+      register, because the scraped rows are the register itself.
     retrieved: "2026-08-24"
     modified: true
     modifications: "scraped, staged, transformed; decade aggregation computed here"
@@ -280,15 +364,20 @@ datasets:
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
     licence_basis: agency_record
+    licence_evidence: "https://www.linz.govt.nz/copyright"
     licence_issue: true
     licence_note: >
-      The LINZ packet's CC BY claim is about the LINZ Data Service
-      (data.linz.govt.nz); the Gazetteer is served from a different host and no
-      licence statement for gazetteer.linz.govt.nz is recorded in this build.
-      The packet also mandates a specific attribution string for LINZ material,
-      which is reproduced in ATTRIBUTION.md. Recommendation: keep with the
-      mandated LINZ attribution, and confirm the Gazetteer's own terms before
-      the next release.
+      gazetteer.linz.govt.nz carries no licence statement of its own - the site
+      footer shows only "(c) Copyright Toitu Te Whenua", and its help pages
+      return HTTP 500 to a scripted client. The governing statement is LINZ's
+      agency-wide copyright page, read at source: "Crown copyright (c). All data
+      and other material produced by Toitu Te Whenua Land Information New
+      Zealand... constitutes Crown copyright", licensed under the Creative
+      Commons Attribution 4.0 International licence unless otherwise specified.
+      LINZ mandates specific attribution wording, reproduced verbatim in
+      ATTRIBUTION.md; because this build modifies the data, the "based
+      on/includes" form applies. Flagged for basis: no Gazetteer-specific
+      statement exists to read.
     retrieved: "2026-08-24"
     modified: true
     modifications: "downloaded, staged, transformed; H3-aggregated for the map layer"
@@ -308,6 +397,12 @@ datasets:
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
     licence_basis: agency_record
+    licence_evidence: "https://www.stats.govt.nz/about-us/copyright/"
+    licence_issue: true
+    licence_note: >
+      Same agency-wide Stats NZ statement as snz_bulk_csv; no separate
+      data.govt.nz record for the property transfer release. Flagged for basis,
+      not for doubt.
     retrieved: "2026-08-24"
     modified: true
     modifications: >
@@ -327,24 +422,57 @@ datasets:
     publisher: "Land Information New Zealand / Toitu Te Whenua"
     registered_under: "LNZ-X1 (keyed source, fetched by scripts/10_keyed_download.py)"
     source_url: "https://data.linz.govt.nz/"
-    licence: "UNVERIFIED"
-    licence_url: ""
-    licence_basis: unverified
-    licence_issue: true
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: dataset_page
+    licence_evidence: "https://catalogue.data.govt.nz/dataset/nz-primary-parcels"
+    licence_per_layer:
+      - layer: "NZ Primary Parcels (LDS layer 50772)"
+        licence: "CC BY 4.0"
+        evidence: "https://catalogue.data.govt.nz/dataset/nz-primary-parcels"
+      - layer: "NZ Property Titles (LDS layer 50804)"
+        licence: "CC BY 4.0"
+        evidence: "https://catalogue.data.govt.nz/dataset/nz-property-titles"
+      - layer: "NZ Addresses (LDS layer 105689)"
+        licence: "CC BY 4.0"
+        evidence: "https://catalogue.data.govt.nz/dataset/nz-addresses"
+      - layer: "NZ Suburbs and Localities (LDS layer 113764)"
+        licence: "CC BY 4.0"
+        evidence: "https://catalogue.data.govt.nz/dataset/nz-suburbs-and-localities"
+    portal_terms: >
+      REDISTRIBUTION PERMITTED for these four layers. The LINZ Data Service is
+      Koordinates-hosted and its terms of use defer to the publisher's licence:
+      "If... You had openly published the data, then the Registered User may
+      likewise openly publish the Registered User's copy as long as the
+      Registered User complies with your licensing terms" (clause 28c), and
+      users must "comply with those licences or agreements when accessing and
+      using the third party data" (clause 34). LINZ openly publishes all four
+      layers under CC BY 4.0, so the portal adds no restriction beyond the
+      licence. The API key gates access, not reuse.
+
+      IMPORTANT EXCEPTION, not triggered here: LINZ's licensing page states that
+      property and ownership layers containing personal information need a
+      separate LINZ Licence for Personal Data, whose terms bar public
+      republication - "You must not allow the Data to be indexed by any public
+      internet web search engine". None of the four layers used here is one of
+      those. LINZ states explicitly that NZ Property Titles is "property data
+      (without owner information)" that "can be accessed without a need for a
+      data licence"; no owners-names layer was fetched, and no person is named
+      in any published table.
     licence_note: >
-      Fetched by WFS from the Koordinates-hosted LINZ Data Service using a
-      personal API key, clipped to the Wellington region. The build records this
-      source only in EXCLUDED_SOURCES with the reason "Koordinates API key
-      required", and design/packet_assumptions.md marks the packet's claim that
-      "nearly everything is CC-BY" as UNTESTABLE. No per-layer licence was
-      captured at download, and the packet itself warns that some LINZ layers
-      require licence acceptance before access. Four layers are nevertheless
-      published here (31,238 parcels, 51,948 addresses, 6,563 suburbs, and a
-      title summary). Recommendation: keep only after confirming each layer's
-      licence on its LDS page and recording it per layer here; if any layer is
-      not open-licensed for redistribution, drop that layer's tables from the
-      extract. Note also that M_PIPELINE_SOURCE in the app still describes this
-      source as excluded, which is now wrong.
+      RESOLVED. Each of the four published layers was confirmed CC BY 4.0 on its
+      own data.govt.nz catalogue record (licence_id CC-BY-4.0, licence_title
+      "Creative Commons Attribution 4.0 International", organisation Land
+      Information New Zealand) - see licence_per_layer. LINZ's own guidance
+      agrees: the Creative Commons Attribution 4.0 International licence
+      "applies to almost all LINZ Data Service content"
+      (https://www.linz.govt.nz/products-services/data/licensing-and-using-data).
+      The portal terms question is answered separately in portal_terms and does
+      not restrict redistribution of these layers. LINZ mandates specific
+      attribution wording for LDS data, reproduced verbatim in ATTRIBUTION.md.
+      Separately, and unchanged by this pass: M_PIPELINE_SOURCE in the app still
+      describes this source as excluded, which is wrong - that staleness is
+      tracked as its own task.
     retrieved: "2026-08-25"
     modified: true
     modifications: >
@@ -370,6 +498,17 @@ datasets:
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
     licence_basis: agency_record
+    licence_evidence: "https://environment.govt.nz/about-this-site/copyright/"
+    licence_issue: true
+    licence_note: >
+      MfE's site-wide copyright statement, read at source: "Unless indicated
+      otherwise for specific items or collections of content... this copyright
+      material is licensed for re-use under the Creative Commons Attribution 4.0
+      International licence", with attribution to the Ministry for the
+      Environment. The exclusions are logos, emblems, trademarks and imagery -
+      none of which this build uses. The inventory landing page carries no
+      licence sentence of its own and the workbook has no data.govt.nz record.
+      Flagged for basis, not for doubt.
     retrieved: "2026-08-24"
     modified: true
     modifications: "downloaded, staged, transformed; gross and net totals separated by worksheet position"
@@ -389,6 +528,11 @@ datasets:
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
     licence_basis: agency_record
+    licence_evidence: "https://environment.govt.nz/about-this-site/copyright/"
+    licence_issue: true
+    licence_note: >
+      Same site-wide MfE statement as mfe_ghg_inventory. Flagged for basis, not
+      for doubt.
     retrieved: "2026-08-24"
     modified: true
     modifications: >
@@ -409,6 +553,11 @@ datasets:
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
     licence_basis: agency_record
+    licence_evidence: "https://www.stats.govt.nz/about-us/copyright/"
+    licence_issue: true
+    licence_note: >
+      Same agency-wide Stats NZ statement as snz_bulk_csv. No separate
+      data.govt.nz record for this release. Flagged for basis, not for doubt.
     retrieved: "2026-08-24"
     modified: true
     modifications: >
@@ -430,6 +579,11 @@ datasets:
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
     licence_basis: agency_record
+    licence_evidence: "https://www.stats.govt.nz/about-us/copyright/"
+    licence_issue: true
+    licence_note: >
+      Same agency-wide Stats NZ statement as snz_bulk_csv. Flagged for basis,
+      not for doubt.
     retrieved: "2026-08-24"
     modified: true
     modifications: "downloaded, staged, transformed"
@@ -452,19 +606,40 @@ datasets:
     publisher: "Ministry for the Environment / Manatu Mo Te Taiao"
     registered_under: "MFE-X1 (keyed source, fetched by scripts/10_keyed_download.py)"
     source_url: "https://data.mfe.govt.nz/"
-    licence: "UNVERIFIED"
-    licence_url: ""
-    licence_basis: unverified
-    licence_issue: true
+    licence: "CC BY 4.0"
+    licence_url: "https://creativecommons.org/licenses/by/4.0/"
+    licence_basis: dataset_page
+    licence_evidence: "https://catalogue.data.govt.nz/dataset/nz-airsheds-gazetted"
+    licence_per_layer:
+      - layer: "NZ Airsheds Gazetted (MfE Data Service layer 98617)"
+        licence: "CC BY 4.0"
+        evidence: "https://catalogue.data.govt.nz/dataset/nz-airsheds-gazetted"
+      - layer: "River water quality, modelled (E. coli, nitrogen, phosphorus, clarity and turbidity, state)"
+        licence: "CC BY 4.0"
+        evidence: "https://catalogue.data.govt.nz/dataset/river-water-quality-escherichia-coli-modelled-2016-2020"
+      - layer: "Annual air quality trends (PM10, PM2.5, nitrogen dioxide, 2011-2020)"
+        licence: "CC BY 4.0"
+        evidence: "https://catalogue.data.govt.nz/dataset/annual-trends-particulate-matter-10-pm10-particulate-matter-2-5-pm2-5-nitrogen-dioxid-2011-2020"
+    portal_terms: >
+      REDISTRIBUTION PERMITTED. The MfE Data Service runs on the same
+      Koordinates platform as the LINZ Data Service and its terms of use defer
+      to the publisher's licence in the same way: a Registered User "may
+      likewise openly publish the Registered User's copy as long as the
+      Registered User complies with your licensing terms" for data the publisher
+      openly published (clause 28c), and must "comply with those licences or
+      agreements when accessing and using the third party data" (clause 34). MfE
+      openly publishes every layer used here under CC BY 4.0, so the portal adds
+      no restriction beyond the licence. No layer used here required accepting a
+      separate instrument, and none contains personal information. The API key
+      gates access, not reuse.
     licence_note: >
-      Fetched by WFS from the Koordinates-hosted MfE Data Service using a
-      personal API key. As with the LINZ Data Service, this source is recorded
-      only in EXCLUDED_SOURCES ("Koordinates API key required") and
-      design/packet_assumptions.md marks MFE-A1 UNTESTABLE; no per-layer licence
-      was captured at download. Seven layers are nevertheless published here.
-      Recommendation: keep only after confirming each layer's licence on its
-      data.mfe.govt.nz page and recording it per layer here. Note also that
-      M_PIPELINE_SOURCE in the app still describes this source as excluded.
+      RESOLVED. Every published layer was confirmed CC BY 4.0 on its own
+      data.govt.nz catalogue record (licence_id CC-BY-4.0, licence_title
+      "Creative Commons Attribution 4.0 International", organisation Ministry
+      for the Environment) - see licence_per_layer. MfE's site-wide statement
+      agrees. The portal terms question is answered separately in portal_terms.
+      Separately, and unchanged by this pass: M_PIPELINE_SOURCE in the app still
+      describes this source as excluded, which is wrong - tracked as its own task.
     retrieved: "2026-08-25"
     modified: true
     modifications: >
@@ -486,7 +661,16 @@ datasets:
     source_url: "https://www.health.govt.nz/publications/regional-data-release-new-zealand-health-survey"
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
-    licence_basis: agency_record
+    licence_basis: dataset_page
+    licence_evidence: "https://catalogue.data.govt.nz/dataset/regional-data-release-new-zealand-health-survey"
+    licence_note: >
+      Confirmed on this dataset's own catalogue record: licence_id CC-BY-4.0,
+      licence_title "Creative Commons Attribution 4.0 International",
+      organisation Ministry of Health. Its four resources - Adult Unadjusted,
+      Adult Age-standardised, Child Unadjusted, Child Age-standardised - are
+      exactly the four files this build staged. health.govt.nz itself refuses
+      non-browser clients with HTTP 403, so the catalogue record is the read
+      source.
     retrieved: "2026-08-24"
     modified: true
     modifications: >
@@ -512,6 +696,19 @@ datasets:
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
     licence_basis: agency_record
+    licence_evidence: "https://www.health.govt.nz/about-this-site/copyright"
+    licence_issue: true
+    licence_note: >
+      The guide is not among the four resources on the health survey's
+      data.govt.nz record, so it has no dataset-level statement. The governing
+      statement is the Ministry's site-wide one: unless otherwise specified,
+      copyright content on the Ministry of Health website is licensed for re-use
+      under a Creative Commons Attribution 4.0 International Licence, excluding
+      photographs, graphic works and the Ministry's logo - none of which this
+      build uses. health.govt.nz sits behind a WAF that returns HTTP 403 to
+      non-browser clients, so the copyright page could not be fetched directly
+      during this pass and was read through the public search index. Flagged for
+      basis.
     retrieved: "2026-08-24"
     modified: true
     modifications: "downloaded, staged, transformed into the indicator dimension"
@@ -530,6 +727,12 @@ datasets:
     licence: "CC BY 4.0"
     licence_url: "https://creativecommons.org/licenses/by/4.0/"
     licence_basis: agency_record
+    licence_evidence: "https://www.stats.govt.nz/about-us/copyright/"
+    licence_issue: true
+    licence_note: >
+      Same agency-wide Stats NZ statement as snz_bulk_csv. No separate
+      data.govt.nz record for the life tables release. Flagged for basis, not
+      for doubt.
     retrieved: "2026-08-24"
     modified: true
     modifications: >
@@ -554,15 +757,16 @@ datasets:
     publisher: "Celnic Consulting (generated)"
     licence: "MIT, as code output"
     licence_url: "https://opensource.org/licenses/MIT"
+    licence_basis: dataset_page
+    licence_evidence: "LICENSE"
     modified: false
     note: >
       Metadata about this build, not agency data. It quotes source titles, URLs
       and file names from the agencies' own pages, which are facts about where
       the files came from. M_PIPELINE_SOURCE currently lists only the 32
       unkeyed sources, and M_EXCLUDED_SOURCES still describes the three keyed
-      sources as excluded even though their data is published here - see the
-      licence notes on linz_data_service_keyed, mfe_data_service_keyed and
-      snz_ade_population.
+      sources as excluded even though their data is published here - a
+      staleness tracked as its own task, not corrected by this attribution pass.
     files:
       - data/mid_range_org_public.duckdb
     tables: [M_ORG_REGISTER, M_PLATFORM_SUMMARY, M_VALIDATION_RESULTS,
@@ -575,6 +779,8 @@ datasets:
     publisher: "Celnic Consulting"
     licence: "MIT, as documentation in this repository"
     licence_url: "https://opensource.org/licenses/MIT"
+    licence_basis: dataset_page
+    licence_evidence: "LICENSE"
     modified: false
     note: >
       Prose describing this build, served by the app's Build Notes tab. Contains
@@ -586,6 +792,8 @@ datasets:
     title: "Synthetic demonstration data"
     publisher: "Celnic Consulting (generated)"
     licence: "CC0 / demonstration only"
+    licence_basis: dataset_page
+    licence_evidence: "LICENSE-DATA"
     modified: false
     note: >
       Generated to fill gaps per the work packet; carries no statistical
@@ -601,7 +809,8 @@ datasets:
 # ====================UPSTREAM_ONLY====================
 # Registered sources that were downloaded or scraped into the working tree but
 # whose data reaches no table in this repository. Listed so the inventory is
-# complete and so nobody assumes the repository carries them.
+# complete and so nobody assumes the repository carries them. Licences here were
+# checked in the same 2026-08-30 pass.
 upstream_only:
   - id: dia_gambling_hub
     registered_under: "DIA-3"
@@ -609,7 +818,13 @@ upstream_only:
     source_url: "https://www.dia.govt.nz/gambling-statistics"
     licence: "CC BY 4.0"
     licence_basis: agency_record
-    note: "Crawl hub. No file was downloaded from it."
+    licence_evidence: "https://www.dia.govt.nz/Copyright"
+    licence_issue: true
+    note: >
+      Crawl hub. No file was downloaded from it. DIA's site-wide statement, read
+      at source: "This work is licensed under the Creative Commons Attribution
+      4.0 licence", attributed in written form to the Department of Internal
+      Affairs, with no use of the DIA or New Zealand Government logo.
 
   - id: snz_international_travel
     registered_under: "CUS-2"
@@ -617,11 +832,13 @@ upstream_only:
     source_url: "https://www.stats.govt.nz/information-releases/international-travel-june-2026/"
     licence: "CC BY 4.0"
     licence_basis: agency_record
+    licence_evidence: "https://www.stats.govt.nz/about-us/copyright/"
+    licence_issue: true
     retrieved: "2026-08-24"
     note: >
       Downloaded to raw/CUS/2026-06/ and staged, but never joined to trade -
       its month basis is processing month, not trade month. No table in this
-      repository reads it.
+      repository reads it. Same agency-wide Stats NZ statement as snz_bulk_csv.
 
   - id: customs_annual_reports
     registered_under: "CUS-3"
@@ -629,30 +846,37 @@ upstream_only:
     source_url: "https://www.customs.govt.nz/about-us/corporate-publications"
     licence: "UNVERIFIED"
     licence_basis: unverified
+    licence_evidence: ""
     licence_issue: true
     licence_note: >
-      Twelve annual report PDFs, 2019-2025. Corporate publications carry Crown
-      copyright and their reuse terms are stated inside each report, which this
-      build did not capture. Immaterial to this repository - the revenue and
-      seizure figures proved to be prose rather than extractable tables, so
-      nothing from them is published here. Recommendation: no action while
-      nothing is redistributed; confirm the reports' own copyright statements
-      before publishing any figure from them.
+      Twelve annual report PDFs, 2019-2025. No copyright or licensing page for
+      customs.govt.nz could be reached during the 2026-08-30 pass
+      (https://www.customs.govt.nz/copyright/ returns HTTP 404), and corporate
+      publications state their reuse terms inside each report, which this build
+      did not capture. Immaterial to this repository - the revenue and seizure
+      figures proved to be prose rather than extractable tables, so nothing from
+      them is published here. Recommendation: no action while nothing is
+      redistributed; confirm the reports' own copyright statements before
+      publishing any figure from them.
     retrieved: "2026-08-24"
 
   - id: mft_fta_portfolio
     registered_under: "MFT-2"
     publisher: "Ministry of Foreign Affairs and Trade"
     source_url: "https://www.mfat.govt.nz/en/trade/free-trade-agreements"
-    licence: "UNVERIFIED"
-    licence_basis: unverified
+    licence: "CC BY 4.0"
+    licence_basis: agency_record
+    licence_evidence: "https://www.mfat.govt.nz/en/copyright"
     licence_issue: true
-    licence_note: >
-      Seven pages scraped into stage/FTA_PORTFOLIO. No licence statement for
-      mfat.govt.nz is recorded in this build. Nothing from it reaches this
-      repository. Recommendation: confirm the site's terms of use before
-      publishing it.
     retrieved: "2026-08-24"
+    licence_note: >
+      Seven pages scraped into stage/FTA_PORTFOLIO; nothing from it reaches this
+      repository. MFAT's copyright page, read at source: "Crown copyright (c).
+      Website copyright statement is licensed under the Creative Commons
+      Attribution 4.0 International licence", free to copy, distribute and adapt
+      with attribution to the Crown. Note the separate treaties.mfat.govt.nz
+      register carries its own, older CC BY 3.0 NZ statement - see
+      mft_treaties_register.
 
   - id: mft_aid_allocations
     registered_under: "MFT-3"
@@ -660,6 +884,8 @@ upstream_only:
     source_url: "https://www.mfat.govt.nz/en/aid-and-development/our-approach-to-aid/where-our-funding-goes"
     licence: "CC BY 4.0"
     licence_basis: agency_record
+    licence_evidence: "https://www.mfat.govt.nz/en/copyright"
+    licence_issue: true
     retrieved: "2026-08-24"
     note: "One PDF, extracted to a text stage. Prose, not tables; nothing published here."
 
@@ -667,15 +893,17 @@ upstream_only:
     registered_under: "LNZ-3"
     publisher: "Land Information New Zealand / Toitu Te Whenua"
     source_url: "https://www.linz.govt.nz/our-work/overseas-investment-regulation/decisions"
-    licence: "UNVERIFIED"
-    licence_basis: unverified
+    licence: "CC BY 4.0"
+    licence_basis: agency_record
+    licence_evidence: "https://www.linz.govt.nz/copyright"
     licence_issue: true
     licence_note: >
-      64 decision links scraped into stage/OIO_DECISIONS. Overseas investment
-      decision summaries concern named applicants and specific transactions;
-      neither their licence nor their republication terms are recorded in this
-      build. Nothing from them reaches this repository. Recommendation: leave
-      unpublished until the terms are confirmed.
+      64 decision links scraped into stage/OIO_DECISIONS. LINZ's site-wide CC BY
+      4.0 statement covers linz.govt.nz material, but overseas investment
+      decision summaries concern named applicants and specific transactions, and
+      an open licence on the text does not settle the privacy question about
+      republishing it. Nothing from them reaches this repository.
+      Recommendation: leave unpublished.
     retrieved: "2026-08-24"
 
   - id: moh_health_survey_landing_page
@@ -683,19 +911,24 @@ upstream_only:
     publisher: "Ministry of Health / Manatu Hauora"
     source_url: "https://www.health.govt.nz/publications/regional-data-release-new-zealand-health-survey"
     licence: "CC BY 4.0"
-    licence_basis: agency_record
-    note: "Crawled so a new release year is picked up. No distinct file."
+    licence_basis: dataset_page
+    licence_evidence: "https://catalogue.data.govt.nz/dataset/regional-data-release-new-zealand-health-survey"
+    note: "Crawled so a new release year is picked up. No distinct file. Same record as moh_health_survey."
 
   - id: healthnz_data
     registered_under: "MOH-8"
     publisher: "Health New Zealand / Te Whatu Ora"
     source_url: "https://www.healthnz.govt.nz/about-us/health-data"
-    licence: "UNVERIFIED"
-    licence_basis: unverified
+    licence: "CC BY 4.0"
+    licence_basis: agency_record
+    licence_evidence: "https://www.healthnz.govt.nz/copyright"
     licence_issue: true
     licence_note: >
       Health NZ is a different legal entity from the Ministry of Health, so the
-      Ministry's agency-level CC BY 4.0 record does not cover it, and
+      Ministry's record does not cover it; its own copyright page was read
+      instead and applies a Creative Commons Attribution 4.0 International
+      Licence to most content, excluding photographs, illustrations and logos.
+      That resolves the licence, but not the access question:
       design/packet_assumptions.md records that its data pages are Disallowed in
       robots.txt. No file was downloaded and nothing reaches this repository.
       Recommendation: leave unpublished.

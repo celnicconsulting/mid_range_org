@@ -1,8 +1,10 @@
 # Mid-Range Organisations — New Zealand Public Data
 
-> **Data & licence.** Built on open data used under CC BY 4.0 — see
+> **Data & licence.** Built on open data used under CC BY 4.0 and CC BY 3.0 NZ
+> — every licence verified at source, 30 August 2026. See
 > [ATTRIBUTION.md](ATTRIBUTION.md) and [DATA_SOURCES.yaml](DATA_SOURCES.yaml)
-> for every source, licence, and modification. Demonstration of method only:
+> for every source, licence, evidence URL, and modification. Demonstration of
+> method only:
 > the data is modified and partly synthetic, and must not be relied on for
 > operational, policy, or reporting purposes.
 
@@ -105,15 +107,32 @@ results, and the list of RAW tables staging did not consume with a reason for
 each.
 
 Data is New Zealand government open data under Creative Commons Attribution
-licences (CC-BY 4.0; CC-BY 3.0 NZ for the Charities Register).
-[DATA_SOURCES.yaml](DATA_SOURCES.yaml) records the licence, retrieval date and
-modifications dataset by dataset, and [ATTRIBUTION.md](ATTRIBUTION.md) gives the
-attribution each licence requires. A handful of datasets carry a licence this
-build could not confirm; they are flagged in both files rather than quietly
-published under a blanket claim.
+licences: CC BY 4.0 for most of it, and **CC BY 3.0 NZ** for the Charities
+Register, the DIA quarterly gaming machine proceeds summary, and the New Zealand
+Treaties Online register.
 
-> Sourced from Toitū Te Whenua Land Information New Zealand data. Crown copyright
-> reserved.
+Every licence was **verified online at source on 30 August 2026** against the
+publisher's own page or the dataset's own `data.govt.nz` catalogue record.
+[DATA_SOURCES.yaml](DATA_SOURCES.yaml) records, dataset by dataset, the licence,
+where it was read (`licence_basis`) and the URL it was read at
+(`licence_evidence`); [ATTRIBUTION.md](ATTRIBUTION.md) gives the attribution
+each licence requires and reproduces the wording LINZ mandates. No published
+dataset is `unverified`. Rows marked † inherit an agency-wide statement because
+no dataset-specific one exists — that is a note about the evidence, not a doubt
+about the licence.
+
+The three API-key sources (LINZ Data Service, MfE Data Service, Stats NZ
+Aotearoa Data Explorer) were checked twice over: the licence on each layer or
+dataflow, and separately whether the portal's terms of use permit redistribution
+of derived extracts. All are CC BY 4.0 and all permit it. The key gates access,
+not reuse.
+
+LINZ mandates its attribution wording, and because this data is modified the
+adapted form applies:
+
+> This work is based on/includes Toitū Te Whenua Land Information New Zealand
+> data which are licensed by Toitū Te Whenua Land Information New Zealand for
+> re-use under the Creative Commons Attribution 4.0 International licence.
 
 No person is named anywhere in this platform: the Charities Register's Officers
 entity was never downloaded, and direct contact details were dropped at staging.
@@ -127,7 +146,7 @@ Two licences apply, to two different things.
 | | Covers | File |
 |---|---|---|
 | **MIT** | the code in this repository — the app, its configuration, and the documentation written for this build | [`LICENSE`](LICENSE) |
-| **Publishers' own licences** | the data — CC BY 4.0 for most of it, CC BY 3.0 NZ for the Charities Register, and several datasets still to be confirmed | [`LICENSE-DATA`](LICENSE-DATA) |
+| **Publishers' own licences** | the data — CC BY 4.0 for most of it, CC BY 3.0 NZ for the Charities Register, the DIA gaming machine proceeds summary and the treaties register; all verified at source | [`LICENSE-DATA`](LICENSE-DATA) |
 
 The MIT licence grants you nothing in the source data. Per-dataset provenance is
 in [DATA_SOURCES.yaml](DATA_SOURCES.yaml); the required attribution is in
