@@ -704,8 +704,13 @@ def build_styled_excel(df: pd.DataFrame, title: str) -> bytes:
             h.font = Font(bold=True, color="10161D")
             h.fill = PatternFill("solid", fgColor="EEF1F5")
             h.border = Border(bottom=Side(style="medium", color="2A78D6"))
-            width = max(11, min(46, int(df[name].astype(str).str.len().max() or 11) + 3,
-                                ))
+            # An all-null column gives a NaN/NA maximum. NaN is truthy, so an
+            # `or` fallback does not catch it and int(NaN) raises - which takes
+            # the whole export down on any table where one measure happens to
+            # have no published values.
+            longest = df[name].astype(str).str.len().max()
+            longest = 0 if pd.isna(longest) else int(longest)
+            width = max(11, min(46, longest + 3))
             ws.column_dimensions[h.column_letter].width = max(width, len(str(name)) + 3)
 
         band = PatternFill("solid", fgColor="F7F8FA")
